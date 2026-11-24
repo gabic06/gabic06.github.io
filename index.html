@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedUFJF 4º Período — Plataforma Acadêmica de Estudos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'Cambria', 'serif'],
+          },
+          colors: {
+            clinical: {
+              bg: '#F7F8FA',
+              surface: '#FFFFFF',
+              subtle: '#F1F3F6',
+              border: '#E2E6EC',
+              ink: '#15202B',
+              muted: '#526071',
+              navy: '#1B365D',
+              navyLight: '#EBF1F8',
+              teal: '#0F6E6E',
+              tealLight: '#E6F4F4',
+              amber: '#9A5B13',
+              amberLight: '#FEF4E6',
+              rose: '#9B2C2C',
+              roseLight: '#FDECEC',
+              emerald: '#1E6B47',
+              emeraldLight: '#E8F5EE',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #F7F8FA;
+      color: #15202B;
+    }
+    .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+    /* Custom scrollbar for dense academic tables/lists */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F3F6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-clinical-bg text-clinical-ink antialiased selection:bg-clinical-navy selection:text-white">
+
+  <!-- Toast / Message Banner (replaces alert/confirm) -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 sm:px-0 pointer-events-none no-print"></div>
+
+  <!-- Top Academic Header -->
+  <header class="bg-clinical-surface border-b border-clinical-border sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3.5 gap-3">
+        <!-- Brand & Course Context -->
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-clinical-navy text-white flex items-center justify-center shrink-0 shadow-sm">
+            <!-- Stethoscope / Caduceus Academic SVG -->
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.5v5a6.5 6.5 0 0013 0v-5M11 17v1.5a3.5 3.5 0 007 0V14a2 2 0 10-4 0v.5" />
+              <circle cx="4.5" cy="4.5" r="1.2" fill="currentColor" />
+              <circle cx="17.5" cy="4.5" r="1.2" fill="currentColor" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="font-editorial text-lg sm:text-xl font-semibold text-clinical-navy tracking-tight">
+                Medicina UFJF · 4º Período
+              </h1>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-clinical-tealLight text-clinical-teal border border-clinical-teal/20">
+                Acesso Livre · YouTube & Livros Clássicos
+              </span>
+            </div>
+            <p class="text-xs text-clinical-muted">
+              Planejamento adaptativo, guias de estudo, provas e simulados comentados — sem cursinhos pagos.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Reset -->
+        <div class="flex items-center justify-between sm:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-clinical-border">
+          <div id="headerStats" class="hidden sm:flex items-center gap-3 text-xs text-clinical-muted mr-2">
+            <!-- Dynamically updated -->
+          </div>
+          <button id="btnRecalcNow" type="button" class="px-3 py-2 rounded-lg text-xs font-medium bg-clinical-navyLight text-clinical-navy hover:bg-clinical-navy hover:text-white transition-colors cursor-pointer flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Recalcular Grade</span>
+          </button>
+          <button id="btnResetDemo" type="button" class="px-3 py-2 rounded-lg text-xs font-medium bg-clinical-subtle text-clinical-muted hover:text-clinical-rose hover:bg-clinical-roseLight transition-colors cursor-pointer" title="Restaurar dados iniciais do 4º período">
+            Restaurar Padrão
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary Navigation Tabs -->
+      <nav class="flex items-center gap-1 overflow-x-auto pb-0 -mb-px no-scrollbar" aria-label="Navegação principal">
+        <button data-tab="cronograma" class="tab-btn active whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-clinical-navy text-clinical-navy transition-colors cursor-pointer flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>1. Painel & Cronograma</span>
+        </button>
+
+        <button data-tab="assuntos" class="tab-btn whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-clinical-muted hover:text-clinical-ink transition-colors cursor-pointer flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>2. Banco de Assuntos & Livros</span>
+        </button>
+
+        <button data-tab="provas" class="tab-btn whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-clinical-muted hover:text-clinical-ink transition-colors cursor-pointer flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          <span>3. Provas & Urgência</span>
+          <span id="badgeExamsCount" class="ml-0.5 text-[11px] px-1.5 py-0.2 rounded-full bg-clinical-navyLight text-clinical-navy font-semibold">0</span>
+        </button>
+
+        <button data-tab="simulados" class="tab-btn whitespace-nowrap px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-clinical-muted hover:text-clinical-ink transition-colors cursor-pointer flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span>4. Simulados & Gabarito</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ===================================================================== -->
+    <!-- ABA 1: PAINEL & CRONOGRAMA SEMANAL DINÂMICO                           -->
+    <!-- ===================================================================== -->
+    <section id="tab-cronograma" class="tab-panel space-y-6">
+      <!-- Top KPI & Balance Strip -->
+      <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- 8 Disciplines Progress & Urgency Overview -->
+      <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 sm:p-5 shadow-2xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="font-editorial text-lg font-semibold text-clinical-navy">Equilíbrio entre as 8 Disciplinas do 4º Período</h2>
+            <p class="text-xs text-clinical-muted">
+              Pesos calculados dinamicamente pela proximidade das provas, volume do conteúdo, status de conclusão e taxa de acerto em questões.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 text-[11px] text-clinical-muted">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-clinical-rose inline-block"></span> Urgência Alta</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-clinical-amber inline-block"></span> Atenção</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-clinical-teal inline-block"></span> Equilibrado</span>
+          </div>
+        </div>
+        <div id="disciplineBalanceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Schedule Controls: View Mode & Day Selector -->
+      <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 sm:p-5 shadow-2xs">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-clinical-border">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="font-editorial text-xl font-semibold text-clinical-navy">Cronograma Semanal Inteligente</h2>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-clinical-emeraldLight text-clinical-emerald font-medium">
+                Domingo 100% Descanso Obrigatório
+              </span>
+            </div>
+            <p id="scheduleMetaText" class="text-xs text-clinical-muted mt-0.5">
+              Inclui blocos de estudo, revisões espaçadas, leituras nos livros clássicos, videoaulas gratuitas e simulado semanal.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex rounded-lg bg-clinical-subtle p-1 border border-clinical-border">
+              <button id="btnViewWeek" type="button" class="px-3 py-1.5 rounded-md text-xs font-medium bg-clinical-surface text-clinical-navy shadow-2xs cursor-pointer">
+                Semana Completa
+              </button>
+              <button id="btnViewDay" type="button" class="px-3 py-1.5 rounded-md text-xs font-medium text-clinical-muted hover:text-clinical-ink cursor-pointer">
+                Foco no Dia
+              </button>
+            </div>
+            <button id="btnGoToSimulado" type="button" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-clinical-teal text-white hover:bg-clinical-navy transition-colors cursor-pointer">
+              Fazer Simulado Semanal
+            </button>
+          </div>
+        </div>
+
+        <!-- Day Selector Pills (Seg a Dom) -->
+        <div id="daySelectorBar" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mt-4">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Schedule Content Area -->
+        <div id="scheduleContentArea" class="mt-5 space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 2: BANCO DE ASSUNTOS & GUIAS POR DISCIPLINA                       -->
+    <!-- ===================================================================== -->
+    <section id="tab-assuntos" class="tab-panel hidden space-y-6">
+      <!-- Filter Bar -->
+      <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 sm:p-5 shadow-2xs">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-editorial text-xl font-semibold text-clinical-navy">Banco de Assuntos & Guias de Referência</h2>
+            <p class="text-xs text-clinical-muted mt-0.5">
+              Selecione uma disciplina ou assunto para consultar videoaulas gratuitas (essenciais e complementares), capítulos dos livros-texto e atualizar seu progresso.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="filterStatusAssunto" class="px-3 py-2 rounded-lg text-xs font-medium bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+              <option value="ALL">Todos os Status</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Em andamento">Em andamento</option>
+              <option value="Concluído">Concluído</option>
+              <option value="Revisado">Revisado</option>
+            </select>
+            <input id="searchAssuntoInput" type="search" placeholder="Buscar assunto, livro ou canal..." class="px-3 py-2 rounded-lg text-xs bg-clinical-bg border border-clinical-border text-clinical-ink placeholder:text-clinical-muted focus:outline-none focus:border-clinical-navy w-full sm:w-56" />
+          </div>
+        </div>
+
+        <!-- 8 Disciplines Filter Chips -->
+        <div id="disciplineFilterChips" class="flex items-center gap-2 overflow-x-auto pt-4 pb-1">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Master-Detail Layout: Topic List Left / Study Guide Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Topics List -->
+        <div class="lg:col-span-5 bg-clinical-surface border border-clinical-border rounded-xl overflow-hidden shadow-2xs">
+          <div class="px-4 py-3 bg-clinical-subtle border-b border-clinical-border flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-clinical-muted">Assuntos Programáticos</span>
+            <span id="topicsCountLabel" class="text-xs font-medium text-clinical-navy">0 assuntos</span>
+          </div>
+          <div id="topicsListContainer" class="divide-y divide-clinical-border max-h-[680px] overflow-y-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Selected Topic Detailed Guide -->
+        <div id="topicDetailPanel" class="lg:col-span-7 bg-clinical-surface border border-clinical-border rounded-xl p-5 sm:p-6 shadow-2xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 3: CADASTRO DE PROVAS & REORGANIZAÇÃO AUTOMÁTICA                  -->
+    <!-- ===================================================================== -->
+    <section id="tab-provas" class="tab-panel hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Exam Form -->
+        <div class="lg:col-span-5 bg-clinical-surface border border-clinical-border rounded-xl p-5 shadow-2xs">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 id="examFormTitle" class="font-editorial text-lg font-semibold text-clinical-navy">Cadastrar Nova Avaliação</h2>
+              <p class="text-xs text-clinical-muted">O cronograma semanal e a quantidade de questões serão recalculados na hora.</p>
+            </div>
+            <button id="btnCancelEditExam" type="button" class="hidden text-xs font-medium text-clinical-muted hover:text-clinical-rose cursor-pointer">
+              Cancelar edição
+            </button>
+          </div>
+
+          <form id="examForm" class="space-y-4">
+            <input type="hidden" id="examEditId" value="" />
+
+            <div>
+              <label for="examDiscipline" class="block text-xs font-semibold text-clinical-ink mb-1">Disciplina (4º Período UFJF)</label>
+              <select id="examDiscipline" required class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+
+            <div>
+              <label for="examTitle" class="block text-xs font-semibold text-clinical-ink mb-1">Título / Conteúdo Programático da Prova</label>
+              <input id="examTitle" type="text" required placeholder="Ex.: P1 — Neurofisiologia e Sistema Cardiovascular" class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink placeholder:text-clinical-muted focus:outline-none focus:border-clinical-navy" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="examDate" class="block text-xs font-semibold text-clinical-ink mb-1">Data da Avaliação</label>
+                <input id="examDate" type="date" required class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy" />
+              </div>
+
+              <div>
+                <label for="examType" class="block text-xs font-semibold text-clinical-ink mb-1">Modalidade</label>
+                <select id="examType" class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+                  <option value="Prova Teórica">Prova Teórica</option>
+                  <option value="Prova Prática / Laboratório">Prova Prática / Laboratório</option>
+                  <option value="Exame Clínico / Semiologia">Exame Clínico / Semiologia</option>
+                  <option value="Seminário / Avaliação Contínua">Seminário / Avaliação Contínua</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="examDifficulty" class="block text-xs font-semibold text-clinical-ink mb-1">Dificuldade / Volume (1 a 5)</label>
+                <select id="examDifficulty" class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+                  <option value="2">2 — Conteúdo Moderado</option>
+                  <option value="3" selected>3 — Padrão Universitário</option>
+                  <option value="4">4 — Alto Volume / Densidade</option>
+                  <option value="5">5 — Crítico / Grande Carga</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="examWeight" class="block text-xs font-semibold text-clinical-ink mb-1">Peso na Nota (1 a 10)</label>
+                <input id="examWeight" type="number" min="1" max="10" value="4" required class="w-full px-3 py-2 rounded-lg text-sm bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy" />
+              </div>
+            </div>
+
+            <button type="submit" id="btnSubmitExam" class="w-full py-2.5 px-4 rounded-lg text-sm font-semibold bg-clinical-navy text-white hover:bg-clinical-teal transition-colors cursor-pointer shadow-xs">
+              Salvar Avaliação e Reorganizar Cronograma
+            </button>
+          </form>
+        </div>
+
+        <!-- Registered Exams List & Logic Explanation -->
+        <div class="lg:col-span-7 space-y-5">
+          <div class="bg-clinical-surface border border-clinical-border rounded-xl p-5 shadow-2xs">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="font-editorial text-lg font-semibold text-clinical-navy">Calendário de Provas Cadastradas</h2>
+                <p class="text-xs text-clinical-muted">Ordenadas por proximidade temporal. Quanto mais próxima a prova, maior a prioridade semanal e o volume de questões.</p>
+              </div>
+            </div>
+            <div id="examsListContainer" class="space-y-3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="bg-clinical-navyLight/60 border border-clinical-navy/15 rounded-xl p-4 sm:p-5">
+            <h3 class="text-sm font-semibold text-clinical-navy mb-1.5">Como o Motor de Reorganização Automática funciona:</h3>
+            <ul class="text-xs text-clinical-ink/85 space-y-1.5 list-disc pl-4">
+              <li><strong>Proximidade da Prova:</strong> Avaliações em até 7 dias recebem impulso máximo de prioridade; entre 8 e 21 dias recebem impulso moderado-alto.</li>
+              <li><strong>Desempenho & Lacunas:</strong> Assuntos <em>Pendentes</em> ou com <em>taxa de acerto abaixo de 75%</em> ganham mais blocos e exercícios comentados.</li>
+              <li><strong>Equilíbrio das 8 Disciplinas:</strong> Mesmo com provas concentradas em uma matéria, todas as 8 disciplinas mantêm presença regular para evitar acúmulo tardio.</li>
+              <li><strong>Domingos Livres:</strong> O domingo nunca recebe cargas de estudo ou simulados, garantindo recuperação cognitiva contínua.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 4: SIMULADOS, QUESTÕES & GABARITO COMENTADO                      -->
+    <!-- ===================================================================== -->
+    <section id="tab-simulados" class="tab-panel hidden space-y-6">
+      <!-- Simulado Header & Controls -->
+      <div class="bg-clinical-surface border border-clinical-border rounded-xl p-5 shadow-2xs">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-clinical-border">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="font-editorial text-xl font-semibold text-clinical-navy">Simulado Semanal & Banco de Questões</h2>
+              <span id="simuladoRecommendedQuota" class="text-xs px-2.5 py-0.5 rounded-full bg-clinical-navyLight text-clinical-navy font-semibold">
+                Meta recomendada: 0 questões/sem
+              </span>
+            </div>
+            <p class="text-xs text-clinical-muted mt-0.5">
+              Questões de múltipla escolha com níveis Fácil, Médio e Difícil (Casos Clínicos / Prova Prática) e gabarito comentado. Responder atualiza seu desempenho por disciplina e assunto.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="simuladoDisciplineFilter" class="px-3 py-2 rounded-lg text-xs font-medium bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+              <option value="ALL">Todas as Disciplinas</option>
+              <!-- Populated by JS -->
+            </select>
+            <select id="simuladoDifficultyFilter" class="px-3 py-2 rounded-lg text-xs font-medium bg-clinical-bg border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+              <option value="ALL">Todas as Dificuldades</option>
+              <option value="Fácil">Fácil</option>
+              <option value="Médio">Médio</option>
+              <option value="Difícil">Difícil (Caso Clínico / Prática)</option>
+            </select>
+            <button id="btnStartWeeklySimulado" type="button" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-clinical-navy text-white hover:bg-clinical-teal transition-colors cursor-pointer">
+              Gerar Simulado Focado
+            </button>
+          </div>
+        </div>
+
+        <!-- Session Score Strip -->
+        <div id="simuladoScoreBar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Questions Container -->
+      <div id="questionsContainer" class="space-y-4">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-clinical-surface border-t border-clinical-border py-5 mt-10 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-clinical-muted">
+      <p>
+        Plataforma de Estudos · <strong>4º Período de Medicina — UFJF</strong> · Recursos gratuitos (YouTube acadêmico & literatura clássica).
+      </p>
+      <p>
+        Canais priorizados: Anatomia e Arte, Prof. Roberval, Anatomia etc., MK Fisiologia, Dr. Christian Morato, Ninja Nerd & InstaLab Pro.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    /**
+     * =========================================================================
+     * PLATAFORMA DE ESTUDOS — 4º PERÍODO DE MEDICINA | UFJF
+     * Arquitetura em JavaScript Puro com Persistência em localStorage
+     * =========================================================================
+     */
+
+    const STORAGE_KEY = 'med_ufjf_4periodo_plataforma_v1';
+
+    // 8 Disciplinas obrigatórias do 4º período com suas referências bibliográficas oficiais
+    const DISCIPLINES = [
+      {
+        id: 'Fisiologia',
+        name: 'Fisiologia',
+        shortCode: 'FIS',
+        books: 'Guyton & Hall — Tratado de Fisiologia Médica',
+        channels: ['MK Fisiologia', 'Ninja Nerd'],
+        accentClass: 'bg-teal-700 text-white',
+        badgeClass: 'bg-clinical-tealLight text-clinical-teal border-clinical-teal/25'
+      },
+      {
+        id: 'Microbiologia',
+        name: 'Microbiologia',
+        shortCode: 'MIC',
+        books: 'Tortora — Microbiologia',
+        channels: ['InstaLab Pro', 'Ninja Nerd'],
+        accentClass: 'bg-indigo-800 text-white',
+        badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200'
+      },
+      {
+        id: 'Antropologia',
+        name: 'Antropologia',
+        shortCode: 'ANT',
+        books: 'Leituras Etnográficas & Antropologia Médica (Helman / Langdon / Geertz — Acesso Acadêmico)',
+        channels: ['Dr. Christian Morato', 'Ninja Nerd'],
+        accentClass: 'bg-amber-800 text-white',
+        badgeClass: 'bg-clinical-amberLight text-clinical-amber border-clinical-amber/25'
+      },
+      {
+        id: 'Anatomia',
+        name: 'Anatomia',
+        shortCode: 'ANA',
+        books: 'Moore — Anatomia Orientada para a Clínica',
+        channels: ['Anatomia e Arte', 'Professor Roberval', 'Anatomia etc.'],
+        accentClass: 'bg-sky-900 text-white',
+        badgeClass: 'bg-sky-50 text-sky-900 border-sky-200'
+      },
+      {
+        id: 'Farmacologia',
+        name: 'Farmacologia',
+        shortCode: 'FAR',
+        books: 'Farmacologia Ilustrada (Whalen), Farmacologia Básica (Katzung) & Goodman & Gilman',
+        channels: ['Ninja Nerd', 'MK Fisiologia'],
+        accentClass: 'bg-emerald-800 text-white',
+        badgeClass: 'bg-clinical-emeraldLight text-clinical-emerald border-clinical-emerald/25'
+      },
+      {
+        id: 'Semiologia',
+        name: 'Semiologia',
+        shortCode: 'SEM',
+        books: 'Porto — Semiologia Médica',
+        channels: ['Dr. Christian Morato', 'Ninja Nerd'],
+        accentClass: 'bg-slate-800 text-white',
+        badgeClass: 'bg-slate-100 text-slate-800 border-slate-300'
+      },
+      {
+        id: 'Histologia',
+        name: 'Histologia',
+        shortCode: 'HIS',
+        books: 'Junqueira e Carneiro — Histologia Básica',
+        channels: ['InstaLab Pro', 'Anatomia etc.'],
+        accentClass: 'bg-purple-800 text-white',
+        badgeClass: 'bg-purple-50 text-purple-800 border-purple-200'
+      },
+      {
+        id: 'Inglês Instrumental',
+        name: 'Inglês Instrumental',
+        shortCode: 'ING',
+        books: 'Artigos Científicos PubMed/NEJM, Glossários Clínicos & Estratégias de Leitura Acadêmica',
+        channels: ['Ninja Nerd', 'Dr. Christian Morato'],
+        accentClass: 'bg-cyan-800 text-white',
+        badgeClass: 'bg-cyan-50 text-cyan-900 border-cyan-200'
+      }
+    ];
+
+    const DAYS_OF_WEEK = [
+      { key: 'seg', label: 'Segunda-feira', short: 'Seg', isRest: false },
+      { key: 'ter', label: 'Terça-feira', short: 'Ter', isRest: false },
+      { key: 'qua', label: 'Quarta-feira', short: 'Qua', isRest: false },
+      { key: 'qui', label: 'Quinta-feira', short: 'Qui', isRest: false },
+      { key: 'sex', label: 'Sexta-feira', short: 'Sex', isRest: false },
+      { key: 'sab', label: 'Sábado', short: 'Sáb', isRest: false },
+      { key: 'dom', label: 'Domingo', short: 'Dom', isRest: true }
+    ];
+
+    // Helper para gerar data ISO relativa a hoje (para provas realistas na abertura)
+    function getRelativeDateISO(daysOffset) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysOffset);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Banco inicial rico com assuntos realistas do 4º período médico da UFJF
+    function createInitialData() {
+      const topics = [
+        // FISIOLOGIA
+        {
+          id: 'fis-neuro',
+          discipline: 'Fisiologia',
+          title: 'Neurofisiologia: Potencial de Ação, Sinapses e Vias Sensoriais',
+          difficulty: 4,
+          status: 'Em andamento',
+          accuracy: 72,
+          videos: [
+            { title: 'Potencial de Ação e Transmissão Sináptica — Fisiologia', channel: 'MK Fisiologia', tier: 'Essencial', query: 'MK Fisiologia potencial de acao sinapses' },
+            { title: 'Action Potential & Synaptic Transmission Complete Overview', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd action potential synaptic transmission' }
+          ],
+          readings: [
+            { book: 'Guyton & Hall', section: 'Cap. 5–7 e Cap. 46–48 (Potenciais de membrana, sinapses e sensibilidade somática)', tier: 'Essencial' },
+            { book: 'Guyton & Hall', section: 'Cap. 49–51 (Dor, analgesia e integração medular)', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'fis-cardio',
+          discipline: 'Fisiologia',
+          title: 'Fisiologia Cardiovascular: Ciclo Cardíaco, Débito e Regulação da PA',
+          difficulty: 5,
+          status: 'Pendente',
+          accuracy: 60,
+          videos: [
+            { title: 'Ciclo Cardíaco, Débito Cardíaco e Curvas Pressão-Volume', channel: 'MK Fisiologia', tier: 'Essencial', query: 'MK Fisiologia ciclo cardiaco debito cardiaco' },
+            { title: 'Regulação da Pressão Arterial a Curto e Longo Prazo', channel: 'MK Fisiologia', tier: 'Essencial', query: 'MK Fisiologia regulacao pressao arterial' },
+            { title: 'Cardiac Cycle and Baroreceptor Reflex', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd cardiac cycle baroreceptor' }
+          ],
+          readings: [
+            { book: 'Guyton & Hall', section: 'Cap. 9–10 e Cap. 18–20 (Ritmicidade, ciclo cardíaco e regulação da PA)', tier: 'Essencial' },
+            { book: 'Guyton & Hall', section: 'Cap. 14–16 (Microcirculação, linfa e fluxo sanguíneo local)', tier: 'Complementar' }
+          ]
+        },
+
+        // MICROBIOLOGIA
+        {
+          id: 'mic-bact',
+          discipline: 'Microbiologia',
+          title: 'Bacteriologia Geral, Parede Celular (Gram), Coloração e Patogênese',
+          difficulty: 3,
+          status: 'Concluído',
+          accuracy: 85,
+          videos: [
+            { title: 'Bacteriologia: Gram-Positivos vs Gram-Negativos e Fatores de Virulência', channel: 'InstaLab Pro', tier: 'Essencial', query: 'InstaLab Pro bacteriologia gram parede celular' },
+            { title: 'Bacterial Structure and Gram Stain', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd bacterial structure gram stain' }
+          ],
+          readings: [
+            { book: 'Tortora', section: 'Cap. 3–4 e Cap. 15 (Morfologia bacteriana, coloração de Gram e mecanismos de patogenicidade)', tier: 'Essencial' },
+            { book: 'Tortora', section: 'Cap. 10–11 (Classificação de procariontes e bactérias clinicamente relevantes)', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'mic-imuno',
+          discipline: 'Microbiologia',
+          title: 'Interação Hospedeiro-Patógeno, Imunidade Inata e Diagnóstico Microbiológico',
+          difficulty: 4,
+          status: 'Em andamento',
+          accuracy: 68,
+          videos: [
+            { title: 'Imunidade Inata, Complemento e Resposta às Infecções', channel: 'InstaLab Pro', tier: 'Essencial', query: 'InstaLab Pro imunidade inata infeccoes' },
+            { title: 'Innate Immune System Overview', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd innate immune system' }
+          ],
+          readings: [
+            { book: 'Tortora', section: 'Cap. 16–17 (Defesas inespecíficas do hospedeiro e imunidade adaptativa aplicada)', tier: 'Essencial' },
+            { book: 'Tortora', section: 'Cap. 21–26 (Infecções por sistemas orgânicos e correlação clínica)', tier: 'Complementar' }
+          ]
+        },
+
+        // ANTROPOLOGIA
+        {
+          id: 'ant-saude',
+          discipline: 'Antropologia',
+          title: 'Antropologia da Saúde, Cultura, Itinerário Terapêutico e Pluralismo Médico',
+          difficulty: 2,
+          status: 'Em andamento',
+          accuracy: 80,
+          videos: [
+            { title: 'Antropologia da Saúde, Cultura e Cuidado na Prática Médica', channel: 'Dr. Christian Morato', tier: 'Essencial', query: 'Dr Christian Morato antropologia saude cultura medicina' },
+            { title: 'Cultural Humility and Social Determinants in Medicine', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd cultural humility social determinants' }
+          ],
+          readings: [
+            { book: 'Antropologia Médica (Trilha UFJF)', section: 'Modelos explicativos de doença (Kleinman/Helman) e itinerários terapêuticos no SUS', tier: 'Essencial' },
+            { book: 'Antropologia Médica (Trilha UFJF)', section: 'Etnografia do encontro clínico e comunicação intercultural', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'ant-corpo',
+          discipline: 'Antropologia',
+          title: 'Corpo, Simbolismo, Sofrimento Social e Determinação Sociocultural',
+          difficulty: 2,
+          status: 'Pendente',
+          accuracy: 75,
+          videos: [
+            { title: 'A Construção Social do Corpo e a Escuta Clínica Ampliada', channel: 'Dr. Christian Morato', tier: 'Essencial', query: 'Dr Christian Morato corpo escuta clinica' }
+          ],
+          readings: [
+            { book: 'Antropologia Médica (Trilha UFJF)', section: 'Corpo biológico vs. corpo vivido, medicalização e sofrimento social', tier: 'Essencial' },
+            { book: 'Antropologia Médica (Trilha UFJF)', section: 'Gênero, território e vulnerabilidades na atenção primária', tier: 'Complementar' }
+          ]
+        },
+
+        // ANATOMIA
+        {
+          id: 'ana-torax',
+          discipline: 'Anatomia',
+          title: 'Anatomia Topográfica do Tórax: Parede Torácica, Pleuras, Pulmões e Mediastino',
+          difficulty: 4,
+          status: 'Em andamento',
+          accuracy: 70,
+          videos: [
+            { title: 'Anatomia do Tórax: Parede, Pleura, Pulmões e Mediastino', channel: 'Anatomia e Arte', tier: 'Essencial', query: 'Anatomia e Arte torax pleura pulmoes mediastino' },
+            { title: 'Topografia Torácica e Relações Anatômicas em Peças', channel: 'Professor Roberval', tier: 'Essencial', query: 'Professor Roberval anatomia do torax pulmao coracao' },
+            { title: 'Anatomia Torácica — Revisão Prática', channel: 'Anatomia etc.', tier: 'Complementar', query: 'Anatomia etc torax mediastino' }
+          ],
+          readings: [
+            { book: 'Moore', section: 'Cap. 1 — Tórax (Parede torácica, cavidades pleurais, pulmões e mediastino)', tier: 'Essencial' },
+            { book: 'Moore', section: 'Cap. 1 — Correlações Clínicas (Pneumotórax, toracocentese e pontos de ausculta)', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'ana-abdome',
+          discipline: 'Anatomia',
+          title: 'Anatomia do Abdome e Vísceras: Peritônio, Trato Gastrointestinal e Retroperitônio',
+          difficulty: 5,
+          status: 'Pendente',
+          accuracy: 58,
+          videos: [
+            { title: 'Anatomia do Abdome: Paredes, Peritônio e Vísceras Digestórias', channel: 'Anatomia e Arte', tier: 'Essencial', query: 'Anatomia e Arte abdome peritonio visceras' },
+            { title: 'Vísceras Abdominais e Irrigação (Tronco Celíaco e Mesentéricas)', channel: 'Professor Roberval', tier: 'Essencial', query: 'Professor Roberval anatomia abdome figado estomago' },
+            { title: 'Parede Abdominal e Canal Inguinal', channel: 'Anatomia etc.', tier: 'Complementar', query: 'Anatomia etc parede abdominal canal inguinal' }
+          ],
+          readings: [
+            { book: 'Moore', section: 'Cap. 2 — Abdome (Parede anterolateral, cavidade peritoneal e vísceras gastrointestinais)', tier: 'Essencial' },
+            { book: 'Moore', section: 'Cap. 2 — Vascularização portal, drenagem linfática e hérnias abdominais', tier: 'Complementar' }
+          ]
+        },
+
+        // FARMACOLOGIA
+        {
+          id: 'far-cinetica',
+          discipline: 'Farmacologia',
+          title: 'Farmacocinética e Farmacodinâmica: ADME, Receptores, Dose-Resposta e Clearance',
+          difficulty: 4,
+          status: 'Concluído',
+          accuracy: 82,
+          videos: [
+            { title: 'Pharmacokinetics: Absorption, Distribution, Metabolism & Excretion', channel: 'Ninja Nerd', tier: 'Essencial', query: 'Ninja Nerd pharmacokinetics ADME' },
+            { title: 'Pharmacodynamics: Receptors, Agonists, Antagonists & Efficacy', channel: 'Ninja Nerd', tier: 'Essencial', query: 'Ninja Nerd pharmacodynamics agonists antagonists' },
+            { title: 'Mecanismos de Ação de Fármacos e Vias de Sinalização', channel: 'MK Fisiologia', tier: 'Complementar', query: 'MK Fisiologia receptores farmacodinamica' }
+          ],
+          readings: [
+            { book: 'Farmacologia Ilustrada', section: 'Cap. 1–2 (Farmacocinética e Farmacodinâmica — mapas mentais e conceitos-chave)', tier: 'Essencial' },
+            { book: 'Farmacologia Básica (Katzung) & Goodman & Gilman', section: 'Princípios de farmacocinética clínica, meia-vida, volume de distribuição e interação medicamentosa', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'far-autonomo',
+          discipline: 'Farmacologia',
+          title: 'Farmacologia do Sistema Nervoso Autônomo: Colinérgicos e Adrenérgicos',
+          difficulty: 5,
+          status: 'Pendente',
+          accuracy: 62,
+          videos: [
+            { title: 'Autonomic Nervous System Pharmacology: Cholinergics & Adrenergics', channel: 'Ninja Nerd', tier: 'Essencial', query: 'Ninja Nerd autonomic nervous system pharmacology adrenergic cholinergic' },
+            { title: 'Sistema Nervoso Autônomo e Resposta aos Fármacos', channel: 'MK Fisiologia', tier: 'Complementar', query: 'MK Fisiologia sistema nervoso autonomo' }
+          ],
+          readings: [
+            { book: 'Farmacologia Ilustrada', section: 'Cap. 3–6 (Agonistas/antagonistas colinérgicos e adrenérgicos)', tier: 'Essencial' },
+            { book: 'Farmacologia Básica & Goodman & Gilman', section: 'Neurotransmissão autonômica e aplicações cardiovasculares/respiratórias', tier: 'Complementar' }
+          ]
+        },
+
+        // SEMIOLOGIA
+        {
+          id: 'sem-anamnese',
+          discipline: 'Semiologia',
+          title: 'Anamnese Clínica, Sinais Vitais, Ectoscopia e Exame Físico Geral',
+          difficulty: 3,
+          status: 'Em andamento',
+          accuracy: 78,
+          videos: [
+            { title: 'Anamnese Médica Estruturada e Exame Físico Geral na Prática', channel: 'Dr. Christian Morato', tier: 'Essencial', query: 'Dr Christian Morato anamnese exame fisico geral' },
+            { title: 'Physical Examination Fundamentals & Vital Signs', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd physical exam vital signs' }
+          ],
+          readings: [
+            { book: 'Porto', section: 'Parte I–II (Entrevista clínica, identificação, queixa principal, HDA e exame físico geral)', tier: 'Essencial' },
+            { book: 'Porto', section: 'Sinais vitais, estado nutricional, hidratação e mucosas', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'sem-cardiopulm',
+          discipline: 'Semiologia',
+          title: 'Semiologia Cardíaca e Pulmonar: Inspeção, Palpação, Percussão e Ausculta',
+          difficulty: 4,
+          status: 'Pendente',
+          accuracy: 65,
+          videos: [
+            { title: 'Semiologia do Aparelho Respiratório e Cardiovascular à Beira-Leito', channel: 'Dr. Christian Morato', tier: 'Essencial', query: 'Dr Christian Morato semiologia cardiaca pulmonar ausculta' },
+            { title: 'Heart Sounds & Lung Sounds Clinical Exam', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd heart sounds lung sounds exam' }
+          ],
+          readings: [
+            { book: 'Porto', section: 'Exame físico do tórax, aparelho respiratório (sons normais e adventícios) e aparelho cardiovascular (bulhas e sopros)', tier: 'Essencial' },
+            { book: 'Porto', section: 'Correlação semiológica de dispneia, dor torácica e edemas', tier: 'Complementar' }
+          ]
+        },
+
+        // HISTOLOGIA
+        {
+          id: 'his-epitelial',
+          discipline: 'Histologia',
+          title: 'Tecido Epitelial de Revestimento, Glandular e Tecido Conjuntivo',
+          difficulty: 3,
+          status: 'Concluído',
+          accuracy: 84,
+          videos: [
+            { title: 'Histologia: Tecido Epitelial e Tecido Conjuntivo nas Lâminas', channel: 'InstaLab Pro', tier: 'Essencial', query: 'InstaLab Pro histologia tecido epitelial conjuntivo' },
+            { title: 'Epithelial and Connective Tissue Histology', channel: 'Anatomia etc.', tier: 'Complementar', query: 'Anatomia etc histologia tecido epitelial conjuntivo' }
+          ],
+          readings: [
+            { book: 'Junqueira e Carneiro', section: 'Cap. 4–5 (Tecido epitelial, especializações apicais/laterais, glândulas e tecido conjuntivo)', tier: 'Essencial' },
+            { book: 'Junqueira e Carneiro', section: 'Cap. 6–8 (Tecido adiposo, cartilaginoso e ósseo — ossificação)', tier: 'Complementar' }
+          ]
+        },
+        {
+          id: 'his-muscnerv',
+          discipline: 'Histologia',
+          title: 'Tecido Muscular (Estriado/Liso), Tecido Nervoso e Histofisiologia de Órgãos',
+          difficulty: 4,
+          status: 'Pendente',
+          accuracy: 66,
+          videos: [
+            { title: 'Histologia: Tecido Muscular e Tecido Nervoso — Identificação em Lâmina', channel: 'InstaLab Pro', tier: 'Essencial', query: 'InstaLab Pro histologia tecido muscular nervoso' },
+            { title: 'Muscle and Nervous Tissue Histology Overview', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd muscle nervous tissue histology' }
+          ],
+          readings: [
+            { book: 'Junqueira e Carneiro', section: 'Cap. 9–10 (Contração muscular, sarcômero, neurônios, glia e fibras nervosas)', tier: 'Essencial' },
+            { book: 'Junqueira e Carneiro', section: 'Cap. 11 e Cap. 14 (Sistema nervoso e aparelho cardiovascular)', tier: 'Complementar' }
+          ]
+        },
+
+        // INGLÊS INSTRUMENTAL
+        {
+          id: 'ing-artigos',
+          discipline: 'Inglês Instrumental',
+          title: 'Leitura Crítica de Abstracts, Métodos e Desfechos Clínicos (IMRaD)',
+          difficulty: 2,
+          status: 'Em andamento',
+          accuracy: 80,
+          videos: [
+            { title: 'Inglês Instrumental na Medicina: Leitura de Artigos e Falsos Cognatos', channel: 'Dr. Christian Morato', tier: 'Essencial', query: 'Dr Christian Morato ingles instrumental medicina artigos' },
+            { title: 'Reading Clinical Trials & Medical Literature Effectively', channel: 'Ninja Nerd', tier: 'Complementar', query: 'Ninja Nerd reading medical literature clinical trials' }
+          ],
+          readings: [
+            { book: 'Inglês Instrumental Médico (Trilha UFJF)', section: 'Estratégias de skimming, scanning, cognatos, conectores argumentativos e estrutura IMRaD', tier: 'Essencial' },
+            { book: 'Inglês Instrumental Médico (Trilha UFJF)', section: 'Interpretação de odds ratio, hazard ratio, p-value e conclusões de abstracts', tier: 'Complementar' }
+          ]
+        }
+      ];
+
+      const exams = [
+        {
+          id: 'exam-1',
+          discipline: 'Fisiologia',
+          title: 'Avaliação 1 — Neurofisiologia e Sistema Cardiovascular',
+          date: getRelativeDateISO(5),
+          type: 'Prova Teórica',
+          difficulty: 4,
+          weight: 5
+        },
+        {
+          id: 'exam-2',
+          discipline: 'Anatomia',
+          title: 'Prova Prática — Tórax e Abdome (Peças e Correlação Clínica)',
+          date: getRelativeDateISO(8),
+          type: 'Prova Prática / Laboratório',
+          difficulty: 5,
+          weight: 5
+        },
+        {
+          id: 'exam-3',
+          discipline: 'Farmacologia',
+          title: 'Avaliação 1 — Farmacocinética, Farmacodinâmica e SNA',
+          date: getRelativeDateISO(12),
+          type: 'Prova Teórica',
+          difficulty: 4,
+          weight: 4
+        },
+        {
+          id: 'exam-4',
+          discipline: 'Microbiologia',
+          title: 'Prova Teórico-Prática — Bacteriologia e Interação Hospedeiro-Patógeno',
+          date: getRelativeDateISO(16),
+          type: 'Prova Prática / Laboratório',
+          difficulty: 4,
+          weight: 4
+        },
+        {
+          id: 'exam-5',
+          discipline: 'Semiologia',
+          title: 'Avaliação Prática — Anamnese, Exame Geral e Tórax',
+          date: getRelativeDateISO(20),
+          type: 'Exame Clínico / Semiologia',
+          difficulty: 4,
+          weight: 4
+        }
+      ];
+
+      const questions = [
+        {
+          id: 'q-1',
+          discipline: 'Fisiologia',
+          topicId: 'fis-cardio',
+          difficulty: 'Médio',
+          stem: 'Durante o ciclo cardíaco normal, imediatamente após o fechamento da valva aórtica (segunda bulha cardíaca — B2), ocorre qual evento hemodinâmico característico?',
+          options: [
+            'Início da ejeção ventricular rápida com abertura das valvas semilunares',
+            'Relaxamento isovolumétrico ventricular, com queda abrupta da pressão intraventricular sem variação de volume',
+            'Enchimento ventricular rápido passivo impulsionado pela contração atrial',
+            'Abertura da valva mitral com elevação imediata do volume sistólico final'
+          ],
+          correctIndex: 1,
+          explanation: 'O fechamento da valva aórtica marca o fim da sístole ventricular e o início do relaxamento isovolumétrico (Guyton & Hall). Nesse intervalo, as valvas atrioventriculares ainda estão fechadas e as semilunares já se fecharam, de modo que o volume ventricular permanece constante enquanto a pressão cai rapidamente.'
+        },
+        {
+          id: 'q-2',
+          discipline: 'Anatomia',
+          topicId: 'ana-torax',
+          difficulty: 'Difícil',
+          stem: 'Na realização de uma toracocentese de alívio ou drenagem pleural na linha axilar média (em posição ortostática/sentada), qual margem costal deve ser evitada para prevenir lesão do feixe vasculonervoso intercostal?',
+          options: [
+            'Margem superior da costela inferior do espaço escolhido',
+            'Margem inferior da costela superior do espaço escolhido',
+            'Borda lateral do esterno na altura do 2º espaço intercostal',
+            'Crista ilíaca anterior superior como referência torácica'
+          ],
+          correctIndex: 1,
+          explanation: 'Segundo Moore (Anatomia Orientada para a Clínica), o feixe vasculonervoso intercostal (veia, artéria e nervo intercostais, nessa ordem de cima para baixo) percorre o sulco da costela, protegido logo abaixo da margem inferior da costela superior. Portanto, a punção deve ser feita rente à margem superior da costela inferior.'
+        },
+        {
+          id: 'q-3',
+          discipline: 'Farmacologia',
+          topicId: 'far-autonomo',
+          difficulty: 'Médio',
+          stem: 'Um paciente recebe um fármaco antagonista competitivo reversível de receptores beta-adrenérgicos (não seletivo). Qual é o efeito esperado na curva dose-resposta de um agonista beta como a isoproterenol?',
+          options: [
+            'Redução da resposta máxima (Emax) sem alterar a potência (EC50)',
+            'Deslocamento da curva dose-resposta para a direita (aumento da EC50), mantendo o mesmo Emax',
+            'Deslocamento da curva para a esquerda com aumento da eficácia máxima',
+            'Inibição irreversível da síntese de AMPc independentemente da dose do agonista'
+          ],
+          correctIndex: 1,
+          explanation: 'No antagonismo competitivo reversível (Farmacologia Ilustrada / Katzung), o antagonista compete pelo mesmo sítio de ligação do agonista. Concentrações maiores do agonista conseguem superar o bloqueio e atingir o mesmo efeito máximo (Emax), deslocando a curva para a direita (maior EC50).'
+        },
+        {
+          id: 'q-4',
+          discipline: 'Microbiologia',
+          topicId: 'mic-bact',
+          difficulty: 'Fácil',
+          stem: 'Na coloração de Gram, bactérias Gram-negativas apresentam coloração avermelhada/rósea ao final do procedimento principalmente porque:',
+          options: [
+            'Possuem parede celular com espessa camada de peptideoglicano que retém o cristal violeta após o álcool-acetona',
+            'Possuem membrana externa lipopolissacarídica e camada fina de peptideoglicano, permitindo remoção do complexo cristal violeta-iodo pelo descorante e posterior coloração pela safranina',
+            'Não possuem membrana plasmática e coram-se apenas por esporos',
+            'São exclusivamente intracelulares obrigatórias e não absorvem corantes básicos'
+          ],
+          correctIndex: 1,
+          explanation: 'De acordo com Tortora, bactérias Gram-negativas têm camada delgada de peptideoglicano envolvida por membrana externa rica em lipopolissacarídeos (LPS). O solvente (álcool ou acetona) remove o complexo cristal violeta-iodo, tornando-as incolores até receberem o corante de fundo (safranina/fucsina).'
+        },
+        {
+          id: 'q-5',
+          discipline: 'Semiologia',
+          topicId: 'sem-cardiopulm',
+          difficulty: 'Difícil',
+          stem: 'Caso Clínico: Paciente de 68 anos, hipertenso crônico, relata dispneia aos moderados esforços e ortopneia. Ao exame físico, observa-se ictus cordis desviado para baixo e para a esquerda (6º EIC na linha axilar anterior), propulsivo, e estertores crepitantes bibasais. Qual é a interpretação semiológica mais coerente?',
+          options: [
+            'Ictus propulsivo e desviado sugere sobrecarga de volume/pressão do ventrículo esquerdo; estertores bibasais reforçam congestão pulmonar',
+            'Ictus desviado para a direita indica dextrocardia congênita sem repercussão hemodinâmica',
+            'Estertores crepitantes em bases pulmonares excluem insuficiência cardíaca esquerda',
+            'Impulsão sistólica paraesternal baixa exclui hipertrofia ventricular'
+          ],
+          correctIndex: 0,
+          explanation: 'Conforme Porto (Semiologia Médica), o desvio do ictus cordis para baixo e para a esquerda com caráter propulsivo traduz aumento e sobrecarga do ventrículo esquerdo, enquanto estertores crepitantes finos bibasais são achado clássico de congestão alveolar/intersticial pulmonar.'
+        },
+        {
+          id: 'q-6',
+          discipline: 'Histologia',
+          topicId: 'his-epitelial',
+          difficulty: 'Fácil',
+          stem: 'Qual estrutura histológica atua como barreira de filtração seletiva e suporte mecânico entre o tecido epitelial e o tecido conjuntivo subjacente, participando também da regeneração epitelial?',
+          options: [
+            'Lâmina basal',
+            'Estereocílio',
+            'Zônula de oclusão isolada do citoplasma',
+            'Canalículo de Havers'
+          ],
+          correctIndex: 0,
+          explanation: 'Segundo Junqueira e Carneiro, a lâmina basal (composta por colágeno tipo IV, laminina, entactina e proteoglicanos) ancora o epitélio ao conjuntivo, regula trocas metabólicas e orienta a migração/cicatrização celular.'
+        },
+        {
+          id: 'q-7',
+          discipline: 'Antropologia',
+          topicId: 'ant-saude',
+          difficulty: 'Médio',
+          stem: 'Na Antropologia Médica, o conceito de "itinerário terapêutico" refere-se:',
+          options: [
+            'Exclusivamente ao protocolo farmacológico prescrito em ambiente hospitalar terciário',
+            'Aos caminhos, escolhas e estratégias construídos por indivíduos e famílias na busca por cuidado e alívio do sofrimento, articulando saberes biomédicos, populares, religiosos e domésticos',
+            'À sequência obrigatória de exames laboratoriais antes de qualquer consulta',
+            'Ao tempo médio de internação em enfermaria clínica'
+          ],
+          correctIndex: 1,
+          explanation: 'Na antropologia da saúde, o itinerário terapêutico descreve como os sujeitos interpretam o adoecimento e transitam por diferentes recursos de cuidado (serviço público, benzedeiras, farmácia, autocuidado), permitindo ao médico compreender adesão, sentidos e barreiras culturais.'
+        },
+        {
+          id: 'q-8',
+          discipline: 'Inglês Instrumental',
+          topicId: 'ing-artigos',
+          difficulty: 'Médio',
+          stem: 'Ao ler o abstract de um ensaio clínico randomizado em inglês, você encontra a frase: "The intervention significantly reduced hospitalization rates compared with standard care (RR 0.64; 95% CI 0.48–0.85; p = 0.002)". Qual é a leitura técnica correta desse resultado?',
+          options: [
+            'A intervenção aumentou as taxas de hospitalização em 64% com significância estatística',
+            'A intervenção associou-se a redução do risco relativo de hospitalização, com intervalo de confiança de 95% abaixo de 1,0 e p < 0,05',
+            'O resultado não tem significância estatística porque o RR é menor que 1,0',
+            'Standard care significa cuidado experimental sem grupo controle'
+          ],
+          correctIndex: 1,
+          explanation: 'Em inglês médico/epidemiológico, Risk Ratio (RR) de 0,64 com IC95% de 0,48 a 0,85 (inteiramente abaixo de 1,0) e p = 0,002 indica redução estatisticamente significativa do desfecho analisado em relação ao cuidado padrão (standard care).'
+        },
+        {
+          id: 'q-9',
+          discipline: 'Fisiologia',
+          topicId: 'fis-neuro',
+          difficulty: 'Difícil',
+          stem: 'Durante a fase de repolarização de um neurônio após um potencial de ação, qual canal iônico se encontra predominantemente aberto contribuindo para o retorno do potencial de membrana em direção ao potencial de repouso?',
+          options: [
+            'Canais de sódio (Na+) dependentes de voltagem no estado aberto',
+            'Canais de potássio (K+) dependentes de voltagem ativados tardiamente, permitindo efluxo de K+',
+            'Canais de cloro ativados exclusivamente por hiperpolarização extrema',
+            'Bomba de cálcio da membrana plasmática sem gasto de ATP'
+          ],
+          correctIndex: 1,
+          explanation: 'Segundo Guyton & Hall, a abertura retardada dos canais de K+ voltagem-dependentes (somada à inativação dos canais de Na+) promove efluxo de íons K+, repolarizando a membrana celular.'
+        },
+        {
+          id: 'q-10',
+          discipline: 'Anatomia',
+          topicId: 'ana-abdome',
+          difficulty: 'Médio',
+          stem: 'Qual estrutura vascular se origina da face anterior da aorta abdominal logo abaixo da origem do tronco celíaco e irriga o intestino médio (da porção inferior do duodeno até os dois terços direitos do colo transverso)?',
+          options: [
+            'Artéria mesentérica superior',
+            'Artéria mesentérica inferior',
+            'Artéria renal esquerda',
+            'Artéria ilíaca comum direita'
+          ],
+          correctIndex: 0,
+          explanation: 'De acordo com Moore, a artéria mesentérica superior emerge da aorta abdominal cerca de 1 cm inferiormente ao tronco celíaco e supre as estruturas derivadas do intestino médio.'
+        },
+        {
+          id: 'q-11',
+          discipline: 'Farmacologia',
+          topicId: 'far-cinetica',
+          difficulty: 'Fácil',
+          stem: 'O termo "biodisponibilidade" (F) de um fármaco administrado por via extravascular refere-se:',
+          options: [
+            'À fração da dose administrada que atinge a circulação sistêmica inalterada',
+            'À velocidade de excreção renal exclusivamente por filtração glomerular',
+            'À ligação do fármaco à albumina plasmática no compartimento tecidual',
+            'À dose tóxica mínima capaz de produzir efeito adverso grave'
+          ],
+          correctIndex: 0,
+          explanation: 'Conforme Farmacologia Ilustrada e Goodman & Gilman, biodisponibilidade é a porcentagem/fração da dose administrada que alcança a circulação sistêmica na forma intacta, sendo influenciada por absorção e metabolismo de primeira passagem.'
+        },
+        {
+          id: 'q-12',
+          discipline: 'Microbiologia',
+          topicId: 'mic-imuno',
+          difficulty: 'Médio',
+          stem: 'No contexto da imunidade inata contra patógenos extracelulares, os receptores de reconhecimento de padrões (PRRs) identificam:',
+          options: [
+            'PAMPs (padrões moleculares associados a patógenos) e DAMPs (padrões moleculares associados a danos)',
+            'Apenas antígenos proteicos apresentados exclusivamente por linfócitos T CD8+ maduros',
+            'Autoantígenos nucleares em indivíduos saudáveis sem estímulo inflamatório',
+            'Antibióticos beta-lactâmicos livres no plasma'
+          ],
+          correctIndex: 0,
+          explanation: 'Em Tortora e na imunologia básica associada, os PRRs (como os receptores Toll-like) reconhecem PAMPs conservados nos microrganismos e DAMPs liberados por células lesadas, disparando cascatas inflamatórias e fagocitose.'
+        }
+      ];
+
+      return {
+        topics,
+        exams,
+        questions,
+        answers: {}, // { [questionId]: { selectedIndex: number, isCorrect: boolean } }
+        completedBlocks: {}, // { [blockId]: boolean }
+        selectedDay: 'seg',
+        scheduleViewMode: 'week', // 'week' | 'day'
+        selectedDisciplineFilter: 'ALL',
+        selectedStatusFilter: 'ALL',
+        searchQuery: '',
+        selectedTopicId: topics[0].id,
+        simuladoDisciplineFilter: 'ALL',
+        simuladoDifficultyFilter: 'ALL',
+        simuladoActiveIds: null, // null = all filtered questions; array = curated weekly simulado subset
+        lastCalculatedAt: new Date().toISOString()
+      };
+    }
+
+    // Estado global da aplicação
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const fresh = createInitialData();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+          return fresh;
+        }
+        const parsed = JSON.parse(raw);
+        const defaults = createInitialData();
+        return {
+          ...defaults,
+          ...parsed,
+          topics: Array.isArray(parsed.topics) && parsed.topics.length ? parsed.topics : defaults.topics,
+          exams: Array.isArray(parsed.exams) ? parsed.exams : defaults.exams,
+          questions: Array.isArray(parsed.questions) && parsed.questions.length ? parsed.questions : defaults.questions,
+          answers: parsed.answers || {},
+          completedBlocks: parsed.completedBlocks || {}
+        };
+      } catch (err) {
+        console.error('Erro ao carregar localStorage:', err);
+        return createInitialData();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        console.error('Erro ao salvar no localStorage:', err);
+        showToast('Aviso: não foi possível salvar alterações no armazenamento local.', 'error');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      const palette = {
+        info: 'bg-clinical-navy text-white border-clinical-navy',
+        success: 'bg-clinical-emerald text-white border-clinical-emerald',
+        error: 'bg-clinical-rose text-white border-clinical-rose'
+      };
+      el.className = `pointer-events-auto px-4 py-3 rounded-xl border text-xs font-medium shadow-lg transition-all duration-200 flex items-center justify-between gap-3 ${palette[type] || palette.info}`;
+      el.innerHTML = `<span>${escapeHTML(message)}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        setTimeout(() => el.remove(), 220);
+      }, 2800);
+    }
+
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getYoutubeSearchUrl(query) {
+      return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    }
+
+    // Calcula dias restantes até uma data ISO (YYYY-MM-DD)
+    function daysUntilDate(dateStr) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const target = new Date(y, (m || 1) - 1, d || 1);
+      target.setHours(0, 0, 0, 0);
+      const diffMs = target.getTime() - today.getTime();
+      return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function formatDateBR(dateStr) {
+      if (!dateStr) return '—';
+      const [y, m, d] = dateStr.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    /**
+     * =========================================================================
+     * MOTOR DE AGENDAMENTO INTELIGENTE & REORGANIZAÇÃO AUTOMÁTICA
+     * =========================================================================
+     * Calcula score de prioridade de cada uma das 8 disciplinas com base em:
+     * 1. Proximidade e peso/dificuldade de provas cadastradas
+     * 2. Assuntos Pendentes / Em andamento e dificuldade do assunto
+     * 3. Desempenho em questões (taxa de acerto menor aumenta prioridade)
+     * 4. Equilíbrio entre todas as 8 matérias (base mínima garantida)
+     */
+    function computeDisciplinePriorities() {
+      const metrics = {};
+
+      for (const disc of DISCIPLINES) {
+        const dTopics = state.topics.filter(t => t.discipline === disc.id);
+        const dExams = state.exams
+          .filter(e => e.discipline === disc.id)
+          .map(e => ({ ...e, daysLeft: daysUntilDate(e.date) }))
+          .filter(e => e.daysLeft >= -1)
+          .sort((a, b) => a.daysLeft - b.daysLeft);
+
+        // Urgência por provas próximas
+        let examUrgency = 0;
+        let nearestExam = null;
+        for (const ex of dExams) {
+          nearestExam = nearestExam || ex;
+          let proximityFactor = 0.25;
+          if (ex.daysLeft <= 3) proximityFactor = 4.5;
+          else if (ex.daysLeft <= 7) proximityFactor = 3.4;
+          else if (ex.daysLeft <= 14) proximityFactor = 2.2;
+          else if (ex.daysLeft <= 25) proximityFactor = 1.3;
+          else proximityFactor = 0.6;
+
+          const diffWeight = (Number(ex.difficulty) || 3) / 3;
+          const examWeight = (Number(ex.weight) || 4) / 4;
+          examUrgency += proximityFactor * diffWeight * examWeight * 18;
+        }
+
+        // Progresso e dificuldade dos assuntos
+        let pendingScore = 0;
+        let completedCount = 0;
+        let totalAccuracy = 0;
+
+        for (const tp of dTopics) {
+          const statusWeight =
+            tp.status === 'Pendente' ? 1.35 :
+            tp.status === 'Em andamento' ? 1.05 :
+            tp.status === 'Concluído' ? 0.55 :
+            0.35; // Revisado
+          if (tp.status === 'Concluído' || tp.status === 'Revisado') completedCount++;
+          const accGap = Math.max(0, (80 - (Number(tp.accuracy) || 70)) / 25);
+          pendingScore += (Number(tp.difficulty) || 3) * statusWeight * (1 + accGap * 0.45);
+          totalAccuracy += Number(tp.accuracy) || 70;
+        }
+
+        const avgAccuracy = dTopics.length ? Math.round(totalAccuracy / dTopics.length) : 75;
+        const progressPct = dTopics.length ? Math.round((completedCount / dTopics.length) * 100) : 0;
+
+        // Base equilibrada para garantir atenção a todas as 8 disciplinas
+        const rawScore = 18 + examUrgency + pendingScore * 2.4;
+
+        let urgencyLevel = 'Equilibrado';
+        if (rawScore >= 52 || (nearestExam && nearestExam.daysLeft <= 7)) {
+          urgencyLevel = 'Alta';
+        } else if (rawScore >= 34 || (nearestExam && nearestExam.daysLeft <= 16)) {
+          urgencyLevel = 'Atenção';
+        }
+
+        metrics[disc.id] = {
+          discipline: disc,
+          rawScore,
+          urgencyLevel,
+          nearestExam,
+          progressPct,
+          avgAccuracy,
+          topicsCount: dTopics.length
+        };
+      }
+
+      // Normaliza percentuais de share semanal
+      const totalScore = Object.values(metrics).reduce((acc, m) => acc + m.rawScore, 0) || 1;
+      for (const id of Object.keys(metrics)) {
+        metrics[id].sharePct = Math.round((metrics[id].rawScore / totalScore) * 100);
+      }
+
+      return metrics;
+    }
+
+    // Seleciona o melhor assunto de uma disciplina para estudar ou revisar
+    function pickTopicForDiscipline(disciplineId, preferReview = false) {
+      const candidates = state.topics.filter(t => t.discipline === disciplineId);
+      if (!candidates.length) {
+        return {
+          id: `gen-${disciplineId}`,
+          discipline: disciplineId,
+          title: `Estudo Dirigido e Revisão Geral de ${disciplineId}`,
+          difficulty: 3,
+          status: 'Em andamento',
+          accuracy: 75,
+          videos: [{ title: `Revisão Completa — ${disciplineId}`, channel: 'Ninja Nerd', tier: 'Essencial', query: `${disciplineId} medicina` }],
+          readings: [{ book: 'Literatura de Referência do 4º Período', section: 'Leitura e fichamento de tópicos principais', tier: 'Essencial' }]
+        };
+      }
+
+      const sorted = [...candidates].sort((a, b) => {
+        const rankA = preferReview
+          ? (a.accuracy < 75 ? 0 : a.status === 'Concluído' ? 1 : 2)
+          : (a.status === 'Pendente' ? 0 : a.status === 'Em andamento' ? 1 : a.status === 'Concluído' ? 2 : 3);
+        const rankB = preferReview
+          ? (b.accuracy < 75 ? 0 : b.status === 'Concluído' ? 1 : 2)
+          : (b.status === 'Pendente' ? 0 : b.status === 'Em andamento' ? 1 : b.status === 'Concluído' ? 2 : 3);
+        if (rankA !== rankB) return rankA - rankB;
+        return (b.difficulty || 3) - (a.difficulty || 3);
+      });
+
+      return sorted[0];
+    }
+
+    // Gera a grade semanal (Segunda a Sábado; Domingo 100% descanso obrigatório)
+    function generateWeeklySchedule(metrics) {
+      const rankedDisciplines = Object.values(metrics).sort((a, b) => b.rawScore - a.rawScore);
+
+      // Quantidade total de questões semanais aumenta conforme provas próximas e volume
+      const imminentExams = state.exams.filter(e => {
+        const d = daysUntilDate(e.date);
+        return d >= 0 && d <= 14;
+      });
+      const baseWeeklyQuestions = 48 + imminentExams.length * 8;
+
+      const dayPlans = [
+        { key: 'seg', discIndices: [0, 3], reviewIndex: 6, qTarget: Math.round(baseWeeklyQuestions * 0.17), isSimuladoDay: false },
+        { key: 'ter', discIndices: [1, 4], reviewIndex: 0, qTarget: Math.round(baseWeeklyQuestions * 0.17), isSimuladoDay: false },
+        { key: 'qua', discIndices: [2, 5], reviewIndex: 3, qTarget: Math.round(baseWeeklyQuestions * 0.16), isSimuladoDay: false },
+        { key: 'qui', discIndices: [6, 7], reviewIndex: 1, qTarget: Math.round(baseWeeklyQuestions * 0.16), isSimuladoDay: false },
+        { key: 'sex', discIndices: [0, 2, 4], reviewIndex: 4, qTarget: Math.round(baseWeeklyQuestions * 0.16), isSimuladoDay: false },
+        { key: 'sab', discIndices: [1, 3, 5, 6, 7], reviewIndex: 2, qTarget: Math.round(baseWeeklyQuestions * 0.18), isSimuladoDay: true },
+        { key: 'dom', discIndices: [], reviewIndex: null, qTarget: 0, isRest: true, isSimuladoDay: false }
+      ];
+
+      let usedTopicIds = new Set();
+
+      return dayPlans.map(plan => {
+        const dayMeta = DAYS_OF_WEEK.find(d => d.key === plan.key);
+
+        if (plan.isRest) {
+          return {
+            ...dayMeta,
+            isRest: true,
+            isSimuladoDay: false,
+            questionsCount: 0,
+            blocks: [],
+            restMessage: 'Domingo de descanso absoluto: sem videoaulas, leituras obrigatórias, revisões ou simulados. Recupere o sono, cuide da mente e aproveite seu tempo livre.'
+          };
+        }
+
+        const blocks = [];
+
+        plan.discIndices.forEach((idx, idxInDay) => {
+          const dMetric = rankedDisciplines[idx % rankedDisciplines.length];
+          let topic = pickTopicForDiscipline(dMetric.discipline.id, false);
+          // Tenta variar assunto se já usado
+          const altTopics = state.topics.filter(t => t.discipline === dMetric.discipline.id && !usedTopicIds.has(t.id));
+          if (altTopics.length > 0 && idxInDay === 0) {
+            topic = altTopics[0];
+          }
+          usedTopicIds.add(topic.id);
+
+          const blockQuestions = Math.max(4, Math.round((plan.qTarget * 0.75) / plan.discIndices.length));
+          const blockId = `blk-${plan.key}-${dMetric.discipline.id}-${idxInDay}`;
+
+          blocks.push({
+            id: blockId,
+            kind: 'estudo',
+            discipline: dMetric.discipline.id,
+            topicId: topic.id,
+            topicTitle: topic.title,
+            urgencyLevel: dMetric.urgencyLevel,
+            sharePct: dMetric.sharePct,
+            questionsCount: blockQuestions,
+            videos: topic.videos || [],
+            readings: topic.readings || [],
+            completed: Boolean(state.completedBlocks[blockId])
+          });
+        });
+
+        // Bloco de Revisão Espaçada Periódica
+        if (plan.reviewIndex !== null) {
+          const revMetric = rankedDisciplines[plan.reviewIndex % rankedDisciplines.length];
+          const revTopic = pickTopicForDiscipline(revMetric.discipline.id, true);
+          const revBlockId = `blk-${plan.key}-rev-${revMetric.discipline.id}`;
+          const revQuestions = Math.max(3, Math.round(plan.qTarget * 0.25));
+
+          blocks.push({
+            id: revBlockId,
+            kind: 'revisao',
+            discipline: revMetric.discipline.id,
+            topicId: revTopic.id,
+            topicTitle: `Revisão Ativa & Flashcards: ${revTopic.title}`,
+            urgencyLevel: revMetric.urgencyLevel,
+            sharePct: revMetric.sharePct,
+            questionsCount: revQuestions,
+            videos: (revTopic.videos || []).slice(0, 1),
+            readings: (revTopic.readings || []).slice(0, 1),
+            completed: Boolean(state.completedBlocks[revBlockId])
+          });
+        }
+
+        // Avaliação / Simulado Semanal de Fixação (Sábado)
+        if (plan.isSimuladoDay) {
+          const simBlockId = `blk-${plan.key}-simulado-semanal`;
+          blocks.push({
+            id: simBlockId,
+            kind: 'simulado',
+            discipline: 'Avaliação Semanal Integrada',
+            topicId: null,
+            topicTitle: 'Simulado Semanal de Fixação (Fácil, Médio e Difícil / Caso Clínico) com Gabarito Comentado',
+            urgencyLevel: imminentExams.length ? 'Alta' : 'Atenção',
+            sharePct: 100,
+            questionsCount: Math.max(10, Math.round(baseWeeklyQuestions * 0.22)),
+            videos: [],
+            readings: [{ book: 'Revisão dos Erros do Simulado', section: 'Consultar comentários fisiopatológicos, anatômicos e farmacológicos após o envio', tier: 'Essencial' }],
+            completed: Boolean(state.completedBlocks[simBlockId])
+          });
+        }
+
+        const totalDayQuestions = blocks.reduce((sum, b) => sum + b.questionsCount, 0);
+
+        return {
+          ...dayMeta,
+          isRest: false,
+          isSimuladoDay: plan.isSimuladoDay,
+          questionsCount: totalDayQuestions,
+          blocks
+        };
+      });
+    }
+
+    /**
+     * =========================================================================
+     * RENDERIZAÇÃO DAS SEÇÕES (UI)
+     * =========================================================================
+     */
+
+    function renderAll() {
+      const metrics = computeDisciplinePriorities();
+      const schedule = generateWeeklySchedule(metrics);
+
+      renderHeaderStats(metrics, schedule);
+      renderKpiGrid(metrics, schedule);
+      renderDisciplineBalance(metrics);
+      renderScheduleSection(schedule, metrics);
+      renderAssuntosSection(metrics);
+      renderProvasSection(metrics);
+      renderSimuladosSection(metrics, schedule);
+
+      document.getElementById('badgeExamsCount').textContent = String(state.exams.length);
+    }
+
+    function renderHeaderStats(metrics, schedule) {
+      const totalTopics = state.topics.length;
+      const doneTopics = state.topics.filter(t => t.status === 'Concluído' || t.status === 'Revisado').length;
+      const weeklyQuestions = schedule.reduce((sum, d) => sum + d.questionsCount, 0);
+
+      document.getElementById('headerStats').innerHTML = `
+        <span>Assuntos: <strong class="text-clinical-ink">${doneTopics}/${totalTopics}</strong></span>
+        <span>·</span>
+        <span>Meta semanal: <strong class="text-clinical-navy">${weeklyQuestions} questões</strong></span>
+      `;
+    }
+
+    function renderKpiGrid(metrics, schedule) {
+      const totalQuestions = schedule.reduce((sum, d) => sum + d.questionsCount, 0);
+      const allBlocks = schedule.flatMap(d => d.blocks);
+      const doneBlocks = allBlocks.filter(b => b.completed).length;
+
+      const upcomingExams = state.exams
+        .map(e => ({ ...e, daysLeft: daysUntilDate(e.date) }))
+        .filter(e => e.daysLeft >= 0)
+        .sort((a, b) => a.daysLeft - b.daysLeft);
+
+      const nextExam = upcomingExams[0];
+      const nextExamText = nextExam
+        ? `${nextExam.discipline} (${nextExam.daysLeft === 0 ? 'Hoje' : `em ${nextExam.daysLeft}d`})`
+        : 'Nenhuma pendente';
+
+      const answeredCount = Object.keys(state.answers).length;
+      const correctCount = Object.values(state.answers).filter(a => a.isCorrect).length;
+      const accuracyRate = answeredCount > 0
+        ? Math.round((correctCount / answeredCount) * 100)
+        : Math.round(Object.values(metrics).reduce((s, m) => s + m.avgAccuracy, 0) / DISCIPLINES.length);
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 shadow-2xs">
+          <p class="text-xs font-medium text-clinical-muted">Blocos Concluídos na Semana</p>
+          <p class="font-editorial text-2xl font-semibold text-clinical-navy mt-1">${doneBlocks} <span class="text-sm font-sans font-normal text-clinical-muted">/ ${allBlocks.length}</span></p>
+          <p class="text-[11px] text-clinical-teal mt-1">Seg–Sáb ativos · Domingo livre</p>
+        </div>
+
+        <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 shadow-2xs">
+          <p class="text-xs font-medium text-clinical-muted">Questões Planejadas (Semana)</p>
+          <p class="font-editorial text-2xl font-semibold text-clinical-navy mt-1">${totalQuestions} <span class="text-sm font-sans font-normal text-clinical-muted">exercícios</span></p>
+          <p class="text-[11px] text-clinical-muted mt-1">Inclui simulado de fixação</p>
+        </div>
+
+        <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 shadow-2xs">
+          <p class="text-xs font-medium text-clinical-muted">Próxima Prova Cadastrada</p>
+          <p class="font-editorial text-xl font-semibold text-clinical-ink mt-1 truncate">${escapeHTML(nextExamText)}</p>
+          <p class="text-[11px] text-clinical-amber mt-1">${upcomingExams.length} avaliação(ões) no radar</p>
+        </div>
+
+        <div class="bg-clinical-surface border border-clinical-border rounded-xl p-4 shadow-2xs">
+          <p class="text-xs font-medium text-clinical-muted">Desempenho em Questões</p>
+          <p class="font-editorial text-2xl font-semibold text-clinical-emerald mt-1">${accuracyRate}%</p>
+          <p class="text-[11px] text-clinical-muted mt-1">${answeredCount > 0 ? `${correctCount}/${answeredCount} no simulado` : 'Média inicial estimada'}</p>
+        </div>
+      `;
+    }
+
+    function renderDisciplineBalance(metrics) {
+      const container = document.getElementById('disciplineBalanceGrid');
+      const items = Object.values(metrics).sort((a, b) => b.rawScore - a.rawScore);
+
+      container.innerHTML = items.map(m => {
+        const barColor =
+          m.urgencyLevel === 'Alta' ? 'bg-clinical-rose' :
+          m.urgencyLevel === 'Atenção' ? 'bg-clinical-amber' :
+          'bg-clinical-teal';
+
+        const badgeColor =
+          m.urgencyLevel === 'Alta' ? 'bg-clinical-roseLight text-clinical-rose' :
+          m.urgencyLevel === 'Atenção' ? 'bg-clinical-amberLight text-clinical-amber' :
+          'bg-clinical-tealLight text-clinical-teal';
+
+        const examNote = m.nearestExam
+          ? `Prova em ${Math.max(0, m.nearestExam.daysLeft)}d`
+          : `Acerto ${m.avgAccuracy}%`;
+
+        return `
+          <div class="p-3.5 rounded-xl bg-clinical-bg border border-clinical-border flex flex-col justify-between gap-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h3 class="text-xs font-bold text-clinical-ink">${escapeHTML(m.discipline.name)}</h3>
+                <p class="text-[11px] text-clinical-muted">${escapeHTML(examNote)} · Domínio ${m.progressPct}%</p>
+              </div>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor} shrink-0">
+                ${m.sharePct}% grade
+              </span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-clinical-subtle overflow-hidden">
+              <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${Math.min(100, Math.max(10, m.sharePct * 3.2))}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderScheduleSection(schedule, metrics) {
+      const dayBar = document.getElementById('daySelectorBar');
+      const contentArea = document.getElementById('scheduleContentArea');
+      const btnWeek = document.getElementById('btnViewWeek');
+      const btnDay = document.getElementById('btnViewDay');
+
+      if (state.scheduleViewMode === 'week') {
+        btnWeek.className = 'px-3 py-1.5 rounded-md text-xs font-medium bg-clinical-surface text-clinical-navy shadow-2xs cursor-pointer';
+        btnDay.className = 'px-3 py-1.5 rounded-md text-xs font-medium text-clinical-muted hover:text-clinical-ink cursor-pointer';
+      } else {
+        btnDay.className = 'px-3 py-1.5 rounded-md text-xs font-medium bg-clinical-surface text-clinical-navy shadow-2xs cursor-pointer';
+        btnWeek.className = 'px-3 py-1.5 rounded-md text-xs font-medium text-clinical-muted hover:text-clinical-ink cursor-pointer';
+      }
+
+      dayBar.innerHTML = schedule.map(day => {
+        const isSelected = state.selectedDay === day.key;
+        const doneCount = day.blocks.filter(b => b.completed).length;
+        const statusSub = day.isRest
+          ? 'Descanso 100%'
+          : `${day.questionsCount} questões · ${doneCount}/${day.blocks.length} blocos`;
+
+        return `
+          <button type="button" data-select-day="${day.key}" class="text-left p-2.5 rounded-xl border transition-all cursor-pointer ${
+            isSelected
+              ? 'bg-clinical-navy text-white border-clinical-navy shadow-xs'
+              : day.isRest
+                ? 'bg-clinical-emeraldLight/60 text-clinical-emerald border-clinical-emerald/30 hover:bg-clinical-emeraldLight'
+                : 'bg-clinical-bg text-clinical-ink border-clinical-border hover:border-clinical-navy/50'
+          }">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold">${day.short}</span>
+              ${day.isSimuladoDay ? `<span class="text-[10px] px-1.5 py-0.2 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-clinical-navyLight text-clinical-navy'} font-semibold">Simulado</span>` : ''}
+            </div>
+            <p class="text-[11px] mt-1 truncate ${isSelected ? 'text-white/85' : 'text-clinical-muted'}">${statusSub}</p>
+          </button>
+        `;
+      }).join('');
+
+      const daysToRender = state.scheduleViewMode === 'day'
+        ? schedule.filter(d => d.key === state.selectedDay)
+        : schedule;
+
+      contentArea.innerHTML = daysToRender.map(day => renderDayCard(day, metrics)).join('');
+
+      // Bind block completion checkboxes
+      contentArea.querySelectorAll('[data-toggle-block]').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const blockId = e.target.getAttribute('data-toggle-block');
+          state.completedBlocks[blockId] = e.target.checked;
+          saveState();
+          renderAll();
+          showToast(e.target.checked ? 'Bloco marcado como concluído!' : 'Marcação de bloco removida.', 'success');
+        });
+      });
+
+      // Bind "Abrir Guia do Assunto" buttons
+      contentArea.querySelectorAll('[data-open-topic]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const topicId = btn.getAttribute('data-open-topic');
+          const topic = state.topics.find(t => t.id === topicId);
+          if (topic) {
+            state.selectedTopicId = topic.id;
+            state.selectedDisciplineFilter = topic.discipline;
+            saveState();
+            switchTab('assuntos');
+            renderAll();
+          }
+        });
+      });
+
+      // Bind day selector buttons
+      dayBar.querySelectorAll('[data-select-day]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedDay = btn.getAttribute('data-select-day');
+          saveState();
+          renderScheduleSection(schedule, metrics);
+        });
+      });
+    }
+
+    function renderDayCard(day, metrics) {
+      if (day.isRest) {
+        return `
+          <div class="rounded-xl border border-clinical-emerald/30 bg-clinical-emeraldLight/50 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-clinical-emerald text-white flex items-center justify-center font-bold text-xs">DOM</span>
+                <div>
+                  <h3 class="font-editorial text-lg font-semibold text-clinical-emerald">${day.label} — Dia de Descanso Obrigatório</h3>
+                  <p class="text-xs text-clinical-ink/80">${escapeHTML(day.restMessage)}</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold px-3 py-1 rounded-full bg-white text-clinical-emerald border border-clinical-emerald/25 self-start sm:self-auto">
+                0 blocos · 0 questões
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      const blocksHtml = day.blocks.map(block => {
+        const isSimulado = block.kind === 'simulado';
+        const isReview = block.kind === 'revisao';
+
+        const kindBadge = isSimulado
+          ? '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-clinical-navy text-white">Simulado Semanal</span>'
+          : isReview
+            ? '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-clinical-amberLight text-clinical-amber border border-clinical-amber/25">Revisão Periódica</span>'
+            : '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-clinical-tealLight text-clinical-teal border border-clinical-teal/25">Estudo Principal</span>';
+
+        const urgencyPill = block.urgencyLevel === 'Alta'
+          ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-clinical-roseLight text-clinical-rose">Prioridade Alta</span>'
+          : block.urgencyLevel === 'Atenção'
+            ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-clinical-amberLight text-clinical-amber">Prioridade Média</span>'
+            : '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-clinical-subtle text-clinical-muted">Equilibrado</span>';
+
+        const videosHtml = block.videos && block.videos.length
+          ? block.videos.map(v => {
+              const tierBadge = v.tier === 'Essencial'
+                ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-clinical-navyLight text-clinical-navy">Essencial</span>'
+                : '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-clinical-subtle text-clinical-muted">Complementar</span>';
+              return `
+                <li class="flex items-start justify-between gap-2 text-xs">
+                  <div class="min-w-0">
+                    <span class="font-semibold text-clinical-ink">${escapeHTML(v.channel)}:</span>
+                    <span class="text-clinical-muted">${escapeHTML(v.title)}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    ${tierBadge}
+                    <a href="${getYoutubeSearchUrl(v.query || (v.channel + ' ' + v.title))}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-medium text-clinical-navy hover:underline whitespace-nowrap">
+                      YouTube ↗
+                    </a>
+                  </div>
+                </li>
+              `;
+            }).join('')
+          : `<li class="text-xs text-clinical-muted">Foco na resolução comentada de questões e revisão das anotações da semana.</li>`;
+
+        const readingsHtml = block.readings && block.readings.length
+          ? block.readings.map(r => {
+              const tierBadge = r.tier === 'Essencial'
+                ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-clinical-emeraldLight text-clinical-emerald">Essencial</span>'
+                : '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-clinical-subtle text-clinical-muted">Complementar</span>';
+              return `
+                <li class="flex items-start justify-between gap-2 text-xs">
+                  <div>
+                    <span class="font-semibold text-clinical-ink">${escapeHTML(r.book)}:</span>
+                    <span class="text-clinical-muted">${escapeHTML(r.section)}</span>
+                  </div>
+                  <span class="shrink-0">${tierBadge}</span>
+                </li>
+              `;
+            }).join('')
+          : '';
+
+        return `
+          <div class="p-4 rounded-xl border ${block.completed ? 'bg-clinical-bg/70 border-clinical-border opacity-80' : 'bg-clinical-surface border-clinical-border'} transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 pb-3 border-b border-clinical-border/70">
+              <div class="flex items-start gap-3">
+                <input type="checkbox" data-toggle-block="${block.id}" ${block.completed ? 'checked' : ''} class="mt-1 w-4 h-4 rounded border-clinical-border text-clinical-navy focus:ring-clinical-navy cursor-pointer shrink-0" />
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs font-bold text-clinical-navy">${escapeHTML(block.discipline)}</span>
+                    ${kindBadge}
+                    ${urgencyPill}
+                  </div>
+                  <h4 class="text-sm font-semibold text-clinical-ink mt-1 ${block.completed ? 'line-through text-clinical-muted' : ''}">
+                    ${escapeHTML(block.topicTitle)}
+                  </h4>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 sm:shrink-0 pl-7 sm:pl-0">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-clinical-navyLight text-clinical-navy">
+                  ${block.questionsCount} questões
+                </span>
+                ${block.topicId ? `
+                  <button type="button" data-open-topic="${block.topicId}" class="text-xs font-medium px-2.5 py-1 rounded-lg border border-clinical-border text-clinical-ink hover:bg-clinical-subtle cursor-pointer">
+                    Guia
+                  </button>
+                ` : `
+                  <button type="button" onclick="switchTab('simulados')" class="text-xs font-medium px-2.5 py-1 rounded-lg bg-clinical-teal text-white hover:bg-clinical-navy cursor-pointer">
+                    Resolver
+                  </button>
+                `}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-clinical-muted mb-1.5">Videoaulas (YouTube)</p>
+                <ul class="space-y-1.5">${videosHtml}</ul>
+              </div>
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-clinical-muted mb-1.5">Leitura nos Livros de Referência</p>
+                <ul class="space-y-1.5">${readingsHtml}</ul>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="rounded-xl border border-clinical-border bg-clinical-bg/60 p-4 sm:p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
+            <div class="flex items-center gap-2.5">
+              <span class="px-2.5 py-1 rounded-lg bg-clinical-navy text-white text-xs font-bold">${day.short.toUpperCase()}</span>
+              <h3 class="font-editorial text-lg font-semibold text-clinical-ink">${day.label}</h3>
+            </div>
+            <div class="text-xs font-medium text-clinical-muted">
+              Total do dia: <strong class="text-clinical-navy">${day.blocks.length} blocos</strong> · <strong class="text-clinical-teal">${day.questionsCount} questões</strong>
+            </div>
+          </div>
+          <div class="space-y-3">
+            ${blocksHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAssuntosSection(metrics) {
+      const chipsContainer = document.getElementById('disciplineFilterChips');
+      const listContainer = document.getElementById('topicsListContainer');
+      const detailPanel = document.getElementById('topicDetailPanel');
+
+      const allChipClass = state.selectedDisciplineFilter === 'ALL'
+        ? 'bg-clinical-navy text-white border-clinical-navy'
+        : 'bg-clinical-bg text-clinical-muted border-clinical-border hover:text-clinical-ink';
+
+      chipsContainer.innerHTML = `
+        <button type="button" data-disc-filter="ALL" class="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${allChipClass}">
+          Todas (8)
+        </button>
+        ${DISCIPLINES.map(d => {
+          const active = state.selectedDisciplineFilter === d.id;
+          return `
+            <button type="button" data-disc-filter="${escapeHTML(d.id)}" class="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
+              active
+                ? 'bg-clinical-navy text-white border-clinical-navy'
+                : 'bg-clinical-bg text-clinical-muted border-clinical-border hover:text-clinical-ink'
+            }">
+              ${escapeHTML(d.name)}
+            </button>
+          `;
+        }).join('')}
+      `;
+
+      chipsContainer.querySelectorAll('[data-disc-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedDisciplineFilter = btn.getAttribute('data-disc-filter');
+          saveState();
+          renderAssuntosSection(metrics);
+        });
+      });
+
+      const q = (state.searchQuery || '').trim().toLowerCase();
+      const filtered = state.topics.filter(t => {
+        const matchDisc = state.selectedDisciplineFilter === 'ALL' || t.discipline === state.selectedDisciplineFilter;
+        const matchStatus = state.selectedStatusFilter === 'ALL' || t.status === state.selectedStatusFilter;
+        const matchText = !q ||
+          t.title.toLowerCase().includes(q) ||
+          t.discipline.toLowerCase().includes(q) ||
+          t.videos.some(v => v.channel.toLowerCase().includes(q) || v.title.toLowerCase().includes(q)) ||
+          t.readings.some(r => r.book.toLowerCase().includes(q) || r.section.toLowerCase().includes(q));
+        return matchDisc && matchStatus && matchText;
+      });
+
+      document.getElementById('topicsCountLabel').textContent = `${filtered.length} assunto(s)`;
+
+      if (!filtered.length) {
+        listContainer.innerHTML = `<div class="p-6 text-center text-xs text-clinical-muted">Nenhum assunto encontrado com os filtros atuais.</div>`;
+        detailPanel.innerHTML = `<p class="text-sm text-clinical-muted">Selecione outro filtro ou limpe a busca para visualizar os guias.</p>`;
+        return;
+      }
+
+      if (!filtered.some(t => t.id === state.selectedTopicId)) {
+        state.selectedTopicId = filtered[0].id;
+      }
+
+      listContainer.innerHTML = filtered.map(t => {
+        const isSel = t.id === state.selectedTopicId;
+        const statusBadge = getStatusBadgeClass(t.status);
+        return `
+          <button type="button" data-select-topic="${t.id}" class="w-full text-left p-4 transition-colors cursor-pointer ${
+            isSel ? 'bg-clinical-navyLight/80' : 'bg-clinical-surface hover:bg-clinical-bg'
+          }">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-bold text-clinical-navy">${escapeHTML(t.discipline)}</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge}">${escapeHTML(t.status)}</span>
+            </div>
+            <h3 class="text-sm font-semibold text-clinical-ink mt-1 leading-snug">${escapeHTML(t.title)}</h3>
+            <div class="flex items-center justify-between text-[11px] text-clinical-muted mt-2">
+              <span>Dificuldade: ${t.difficulty}/5</span>
+              <span>Acerto: <strong class="text-clinical-ink">${t.accuracy}%</strong></span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      listContainer.querySelectorAll('[data-select-topic]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedTopicId = btn.getAttribute('data-select-topic');
+          saveState();
+          renderAssuntosSection(metrics);
+        });
+      });
+
+      const selectedTopic = filtered.find(t => t.id === state.selectedTopicId) || filtered[0];
+      const discMeta = DISCIPLINES.find(d => d.id === selectedTopic.discipline) || DISCIPLINES[0];
+
+      detailPanel.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-clinical-border">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${discMeta.badgeClass} border">${escapeHTML(selectedTopic.discipline)}</span>
+                <span class="text-xs text-clinical-muted">Nível de complexidade: <strong>${selectedTopic.difficulty}/5</strong></span>
+              </div>
+              <h3 class="font-editorial text-xl sm:text-2xl font-semibold text-clinical-navy mt-2">${escapeHTML(selectedTopic.title)}</h3>
+              <p class="text-xs text-clinical-muted mt-1">Livros de referência da disciplina: <strong>${escapeHTML(discMeta.books)}</strong></p>
+            </div>
+          </div>
+
+          <!-- Status & Performance Controls -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-clinical-bg border border-clinical-border">
+            <div>
+              <label for="topicStatusSelect" class="block text-xs font-semibold text-clinical-ink mb-1.5">Status do Assunto</label>
+              <select id="topicStatusSelect" class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-clinical-surface border border-clinical-border text-clinical-ink focus:outline-none focus:border-clinical-navy">
+                <option value="Pendente" ${selectedTopic.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                <option value="Em andamento" ${selectedTopic.status === 'Em andamento' ? 'selected' : ''}>Em andamento</option>
+                <option value="Concluído" ${selectedTopic.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+                <option value="Revisado" ${selectedTopic.status === 'Revisado' ? 'selected' : ''}>Revisado</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="topicAccuracyRange" class="flex items-center justify-between text-xs font-semibold text-clinical-ink mb-1.5">
+                <span>Taxa de Acerto em Questões</span>
+                <span id="topicAccuracyVal" class="text-clinical-navy font-bold">${selectedTopic.accuracy}%</span>
+              </label>
+              <input id="topicAccuracyRange" type="range" min="0" max="100" step="5" value="${selectedTopic.accuracy}" class="w-full accent-clinical-navy cursor-pointer mt-1.5" />
+            </div>
+          </div>
+
+          <!-- Videoaulas Gratuitas -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-clinical-muted mb-2.5">Videoaulas Recomendadas (YouTube Gratuito)</h4>
+            <div class="space-y-2.5">
+              ${selectedTopic.videos.map(v => {
+                const isEss = v.tier === 'Essencial';
+                return `
+                  <div class="p-3.5 rounded-xl border border-clinical-border bg-clinical-bg/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-xs font-bold text-clinical-navy">${escapeHTML(v.channel)}</span>
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${isEss ? 'bg-clinical-navyLight text-clinical-navy' : 'bg-clinical-subtle text-clinical-muted'}">${escapeHTML(v.tier)}</span>
+                      </div>
+                      <p class="text-xs text-clinical-ink mt-1">${escapeHTML(v.title)}</p>
+                    </div>
+                    <a href="${getYoutubeSearchUrl(v.query || (v.channel + ' ' + v.title))}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-clinical-navy text-white hover:bg-clinical-teal transition-colors shrink-0 text-center">
+                      Assistir no YouTube ↗
+                    </a>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Leituras nos Livros -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-clinical-muted mb-2.5">Leitura em Livros & Materiais Acadêmicos</h4>
+            <div class="space-y-2.5">
+              ${selectedTopic.readings.map(r => {
+                const isEss = r.tier === 'Essencial';
+                return `
+                  <div class="p-3.5 rounded-xl border border-clinical-border bg-clinical-bg/60">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-xs font-bold text-clinical-ink">${escapeHTML(r.book)}</span>
+                      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${isEss ? 'bg-clinical-emeraldLight text-clinical-emerald' : 'bg-clinical-subtle text-clinical-muted'}">${escapeHTML(r.tier)}</span>
+                    </div>
+                    <p class="text-xs text-clinical-muted mt-1 leading-relaxed">${escapeHTML(r.section)}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Bind status & accuracy updates (triggers automatic schedule recalculation)
+      document.getElementById('topicStatusSelect').addEventListener('change', (e) => {
+        selectedTopic.status = e.target.value;
+        saveState();
+        renderAll();
+        showToast(`Status atualizado para "${selectedTopic.status}" e cronograma recalculado.`, 'success');
+      });
+
+      const accRange = document.getElementById('topicAccuracyRange');
+      const accVal = document.getElementById('topicAccuracyVal');
+      accRange.addEventListener('input', () => {
+        accVal.textContent = `${accRange.value}%`;
+      });
+      accRange.addEventListener('change', () => {
+        selectedTopic.accuracy = Number(accRange.value);
+        saveState();
+        renderAll();
+        showToast(`Desempenho de ${selectedTopic.accuracy}% registrado; cronograma ajustado.`, 'success');
+      });
+    }
+
+    function getStatusBadgeClass(status) {
+      switch (status) {
+        case 'Revisado': return 'bg-clinical-emeraldLight text-clinical-emerald';
+        case 'Concluído': return 'bg-clinical-tealLight text-clinical-teal';
+        case 'Em andamento': return 'bg-clinical-amberLight text-clinical-amber';
+        default: return 'bg-clinical-subtle text-clinical-muted';
+      }
+    }
+
+    function renderProvasSection() {
+      const selectDisc = document.getElementById('examDiscipline');
+      const currentSelected = selectDisc.value;
+      selectDisc.innerHTML = DISCIPLINES.map(d => `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)}</option>`).join('');
+      if (currentSelected) selectDisc.value = currentSelected;
+
+      const listEl = document.getElementById('examsListContainer');
+      if (!state.exams.length) {
+        listEl.innerHTML = `<p class="text-xs text-clinical-muted py-4">Nenhuma prova cadastrada ainda. Use o formulário ao lado para adicionar suas datas do 4º período.</p>`;
+        return;
+      }
+
+      const sortedExams = [...state.exams]
+        .map(e => ({ ...e, daysLeft: daysUntilDate(e.date) }))
+        .sort((a, b) => a.daysLeft - b.daysLeft);
+
+      listEl.innerHTML = sortedExams.map(ex => {
+        const urgencyTag = ex.daysLeft < 0
+          ? '<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-clinical-subtle text-clinical-muted">Realizada</span>'
+          : ex.daysLeft <= 7
+            ? `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-clinical-roseLight text-clinical-rose">Faltam ${ex.daysLeft}d · Alta Urgência</span>`
+            : ex.daysLeft <= 15
+              ? `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-clinical-amberLight text-clinical-amber">Faltam ${ex.daysLeft}d · Atenção</span>`
+              : `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-clinical-tealLight text-clinical-teal">Faltam ${ex.daysLeft}d</span>`;
+
+        return `
+          <div class="p-4 rounded-xl border border-clinical-border bg-clinical-bg/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold text-clinical-navy">${escapeHTML(ex.discipline)}</span>
+                <span class="text-xs text-clinical-muted">· ${formatDateBR(ex.date)}</span>
+                ${urgencyTag}
+              </div>
+              <h3 class="text-sm font-semibold text-clinical-ink mt-1">${escapeHTML(ex.title)}</h3>
+              <p class="text-[11px] text-clinical-muted mt-0.5">
+                ${escapeHTML(ex.type)} · Dificuldade ${ex.difficulty}/5 · Peso ${ex.weight}/10
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" data-edit-exam="${ex.id}" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-clinical-surface border border-clinical-border text-clinical-ink hover:bg-clinical-subtle cursor-pointer">
+                Editar
+              </button>
+              <button type="button" data-delete-exam="${ex.id}" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-clinical-roseLight text-clinical-rose hover:bg-clinical-rose hover:text-white transition-colors cursor-pointer">
+                Remover
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('[data-edit-exam]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-edit-exam');
+          const exam = state.exams.find(e => e.id === id);
+          if (!exam) return;
+          document.getElementById('examEditId').value = exam.id;
+          document.getElementById('examDiscipline').value = exam.discipline;
+          document.getElementById('examTitle').value = exam.title;
+          document.getElementById('examDate').value = exam.date;
+          document.getElementById('examType').value = exam.type;
+          document.getElementById('examDifficulty').value = String(exam.difficulty);
+          document.getElementById('examWeight').value = String(exam.weight);
+          document.getElementById('examFormTitle').textContent = 'Editar Avaliação';
+          document.getElementById('btnCancelEditExam').classList.remove('hidden');
+        });
+      });
+
+      listEl.querySelectorAll('[data-delete-exam]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-delete-exam');
+          state.exams = state.exams.filter(e => e.id !== id);
+          saveState();
+          renderAll();
+          showToast('Prova removida e cronograma reorganizado automaticamente.', 'info');
+        });
+      });
+    }
+
+    function renderSimuladosSection(metrics, schedule) {
+      const discFilterSelect = document.getElementById('simuladoDisciplineFilter');
+      const prevDisc = state.simuladoDisciplineFilter;
+      discFilterSelect.innerHTML = `<option value="ALL">Todas as Disciplinas</option>` +
+        DISCIPLINES.map(d => `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)}</option>`).join('');
+      discFilterSelect.value = prevDisc;
+
+      document.getElementById('simuladoDifficultyFilter').value = state.simuladoDifficultyFilter;
+
+      const weeklyTarget = schedule.reduce((sum, d) => sum + d.questionsCount, 0);
+      document.getElementById('simuladoRecommendedQuota').textContent = `Meta recomendada: ${weeklyTarget} questões/sem`;
+
+      const answeredIds = Object.keys(state.answers);
+      const correctCount = Object.values(state.answers).filter(a => a.isCorrect).length;
+      const pct = answeredIds.length ? Math.round((correctCount / answeredIds.length) * 100) : 0;
+
+      document.getElementById('simuladoScoreBar').innerHTML = `
+        <div class="p-3 rounded-xl bg-clinical-bg border border-clinical-border">
+          <p class="text-[11px] text-clinical-muted">Questões Respondidas</p>
+          <p class="text-lg font-bold text-clinical-navy">${answeredIds.length} / ${state.questions.length}</p>
+        </div>
+        <div class="p-3 rounded-xl bg-clinical-bg border border-clinical-border">
+          <p class="text-[11px] text-clinical-muted">Acertos</p>
+          <p class="text-lg font-bold text-clinical-emerald">${correctCount}</p>
+        </div>
+        <div class="p-3 rounded-xl bg-clinical-bg border border-clinical-border">
+          <p class="text-[11px] text-clinical-muted">Aproveitamento</p>
+          <p class="text-lg font-bold text-clinical-teal">${pct}%</p>
+        </div>
+        <div class="p-3 rounded-xl bg-clinical-bg border border-clinical-border flex items-center justify-between gap-2">
+          <div>
+            <p class="text-[11px] text-clinical-muted">Limpar Respostas</p>
+            <p class="text-xs font-semibold text-clinical-ink">Refazer banco</p>
+          </div>
+          <button id="btnClearSimuladoAnswers" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-clinical-subtle hover:bg-clinical-roseLight hover:text-clinical-rose cursor-pointer">
+            Resetar
+          </button>
+        </div>
+      `;
+
+      document.getElementById('btnClearSimuladoAnswers').addEventListener('click', () => {
+        state.answers = {};
+        state.simuladoActiveIds = null;
+        saveState();
+        renderAll();
+        showToast('Respostas do simulado zeradas.', 'info');
+      });
+
+      let visibleQuestions = state.questions.filter(q => {
+        const matchDisc = state.simuladoDisciplineFilter === 'ALL' || q.discipline === state.simuladoDisciplineFilter;
+        const matchDiff = state.simuladoDifficultyFilter === 'ALL' || q.difficulty === state.simuladoDifficultyFilter;
+        const matchCurated = !Array.isArray(state.simuladoActiveIds) || state.simuladoActiveIds.includes(q.id);
+        return matchDisc && matchDiff && matchCurated;
+      });
+
+      const qContainer = document.getElementById('questionsContainer');
+      if (!visibleQuestions.length) {
+        qContainer.innerHTML = `
+          <div class="bg-clinical-surface border border-clinical-border rounded-xl p-6 text-center">
+            <p class="text-sm text-clinical-muted mb-3">Nenhuma questão corresponde exatamente aos filtros selecionados.</p>
+            <button id="btnResetSimuladoFilter" type="button" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-clinical-navy text-white cursor-pointer">
+              Mostrar Todas as Questões
+            </button>
+          </div>
+        `;
+        const rBtn = document.getElementById('btnResetSimuladoFilter');
+        if (rBtn) {
+          rBtn.addEventListener('click', () => {
+            state.simuladoDisciplineFilter = 'ALL';
+            state.simuladoDifficultyFilter = 'ALL';
+            state.simuladoActiveIds = null;
+            saveState();
+            renderSimuladosSection(metrics, schedule);
+          });
+        }
+        return;
+      }
+
+      qContainer.innerHTML = visibleQuestions.map((q, idx) => {
+        const ans = state.answers[q.id];
+        const hasAnswered = Boolean(ans);
+        const diffBadge =
+          q.difficulty === 'Difícil' ? 'bg-clinical-roseLight text-clinical-rose' :
+          q.difficulty === 'Médio' ? 'bg-clinical-amberLight text-clinical-amber' :
+          'bg-clinical-emeraldLight text-clinical-emerald';
+
+        const optionsHtml = q.options.map((optText, optIdx) => {
+          const letter = ['A', 'B', 'C', 'D'][optIdx] || String(optIdx + 1);
+          let optClass = 'bg-clinical-bg border-clinical-border text-clinical-ink hover:border-clinical-navy';
+          if (hasAnswered) {
+            if (optIdx === q.correctIndex) {
+              optClass = 'bg-clinical-emeraldLight border-clinical-emerald text-clinical-ink font-semibold';
+            } else if (optIdx === ans.selectedIndex && !ans.isCorrect) {
+              optClass = 'bg-clinical-roseLight border-clinical-rose text-clinical-rose';
+            } else {
+              optClass = 'bg-clinical-bg/60 border-clinical-border text-clinical-muted opacity-75';
+            }
+          }
+
+          return `
+            <button type="button" data-answer-q="${q.id}" data-opt-idx="${optIdx}" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-colors flex items-start gap-2.5 cursor-pointer ${optClass}">
+              <span class="w-6 h-6 rounded-md bg-clinical-surface border border-clinical-border flex items-center justify-center text-xs font-bold shrink-0">${letter}</span>
+              <span class="leading-relaxed">${escapeHTML(optText)}</span>
+            </button>
+          `;
+        }).join('');
+
+        const commentHtml = hasAnswered ? `
+          <div class="mt-4 p-4 rounded-xl border ${ans.isCorrect ? 'bg-clinical-emeraldLight/60 border-clinical-emerald/30' : 'bg-clinical-navyLight/60 border-clinical-navy/20'}">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-xs font-bold ${ans.isCorrect ? 'text-clinical-emerald' : 'text-clinical-navy'}">
+                ${ans.isCorrect ? '✓ Resposta Correta!' : `Gabarito: Alternativa ${['A', 'B', 'C', 'D'][q.correctIndex]}`}
+              </span>
+              <span class="text-[11px] text-clinical-muted">Desempenho do assunto atualizado</span>
+            </div>
+            <p class="text-xs sm:text-sm text-clinical-ink leading-relaxed">${escapeHTML(q.explanation)}</p>
+          </div>
+        ` : '';
+
+        return `
+          <article class="bg-clinical-surface border border-clinical-border rounded-xl p-5 shadow-2xs">
+            <div class="flex items-center justify-between gap-2 flex-wrap mb-2.5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold text-clinical-navy">Questão ${idx + 1} · ${escapeHTML(q.discipline)}</span>
+                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${diffBadge}">${escapeHTML(q.difficulty)}</span>
+              </div>
+              ${hasAnswered ? `<span class="text-[11px] font-semibold ${ans.isCorrect ? 'text-clinical-emerald' : 'text-clinical-rose'}">${ans.isCorrect ? 'Acertou' : 'Errou'}</span>` : ''}
+            </div>
+
+            <h3 class="text-sm sm:text-base font-medium text-clinical-ink leading-relaxed mb-3.5">${escapeHTML(q.stem)}</h3>
+
+            <div class="space-y-2">
+              ${optionsHtml}
+            </div>
+
+            ${commentHtml}
+          </article>
+        `;
+      }).join('');
+
+      qContainer.querySelectorAll('[data-answer-q]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qId = btn.getAttribute('data-answer-q');
+          const optIdx = Number(btn.getAttribute('data-opt-idx'));
+          const question = state.questions.find(item => item.id === qId);
+          if (!question) return;
+
+          const isCorrect = optIdx === question.correctIndex;
+          state.answers[qId] = { selectedIndex: optIdx, isCorrect };
+
+          // Atualiza taxa de acerto do assunto correspondente para retroalimentar o cronograma
+          if (question.topicId) {
+            const topic = state.topics.find(t => t.id === question.topicId);
+            if (topic) {
+              const delta = isCorrect ? 8 : -10;
+              topic.accuracy = Math.max(20, Math.min(100, (Number(topic.accuracy) || 70) + delta));
+            }
+          }
+
+          saveState();
+          renderAll();
+          showToast(isCorrect ? 'Acertou! Comentário liberado e taxa de acerto elevada.' : 'Gabarito comentado exibido; reforço incluído no cronograma.', isCorrect ? 'success' : 'info');
+        });
+      });
+    }
+
+    /**
+     * =========================================================================
+     * NAVEGAÇÃO E EVENTOS GLOBAIS
+     * =========================================================================
+     */
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== `tab-${tabName}`);
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.getAttribute('data-tab') === tabName;
+        btn.classList.toggle('active', isActive);
+        btn.classList.toggle('border-clinical-navy', isActive);
+        btn.classList.toggle('text-clinical-navy', isActive);
+        btn.classList.toggle('border-transparent', !isActive);
+        btn.classList.toggle('text-clinical-muted', !isActive);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function bindEvents() {
+      // Abas principais
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchTab(btn.getAttribute('data-tab'));
+        });
+      });
+
+      // Modo de visualização do cronograma
+      document.getElementById('btnViewWeek').addEventListener('click', () => {
+        state.scheduleViewMode = 'week';
+        saveState();
+        renderAll();
+      });
+      document.getElementById('btnViewDay').addEventListener('click', () => {
+        state.scheduleViewMode = 'day';
+        saveState();
+        renderAll();
+      });
+
+      // Ir para simulado semanal
+      document.getElementById('btnGoToSimulado').addEventListener('click', () => {
+        switchTab('simulados');
+      });
+
+      // Recalcular grade manualmente
+      document.getElementById('btnRecalcNow').addEventListener('click', () => {
+        state.lastCalculatedAt = new Date().toISOString();
+        saveState();
+        renderAll();
+        showToast('Grade semanal recalculada com base nas provas, assuntos e desempenho.', 'success');
+      });
+
+      // Restaurar dados padrão do 4º período
+      document.getElementById('btnResetDemo').addEventListener('click', () => {
+        state = createInitialData();
+        saveState();
+        renderAll();
+        showToast('Dados iniciais do 4º período UFJF restaurados.', 'info');
+      });
+
+      // Filtros de Assuntos
+      document.getElementById('filterStatusAssunto').addEventListener('change', (e) => {
+        state.selectedStatusFilter = e.target.value;
+        saveState();
+        renderAll();
+      });
+      document.getElementById('searchAssuntoInput').addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        saveState();
+        renderAll();
+      });
+
+      // Formulário de Cadastro / Edição de Provas
+      const examForm = document.getElementById('examForm');
+      const btnCancelEdit = document.getElementById('btnCancelEditExam');
+
+      btnCancelEdit.addEventListener('click', () => {
+        examForm.reset();
+        document.getElementById('examEditId').value = '';
+        document.getElementById('examFormTitle').textContent = 'Cadastrar Nova Avaliação';
+        btnCancelEdit.classList.add('hidden');
+      });
+
+      examForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('examEditId').value;
+        const discipline = document.getElementById('examDiscipline').value;
+        const title = document.getElementById('examTitle').value.trim();
+        const date = document.getElementById('examDate').value;
+        const type = document.getElementById('examType').value;
+        const difficulty = Number(document.getElementById('examDifficulty').value) || 3;
+        const weight = Number(document.getElementById('examWeight').value) || 4;
+
+        if (!title || !date) {
+          showToast('Preencha o título e a data da avaliação.', 'error');
+          return;
+        }
+
+        if (editId) {
+          const idx = state.exams.findIndex(item => item.id === editId);
+          if (idx !== -1) {
+            state.exams[idx] = { ...state.exams[idx], discipline, title, date, type, difficulty, weight };
+          }
+          showToast('Avaliação atualizada e cronograma reorganizado automaticamente!', 'success');
+        } else {
+          state.exams.push({
+            id: `exam-${Date.now()}`,
+            discipline,
+            title,
+            date,
+            type,
+            difficulty,
+            weight
+          });
+          showToast('Nova prova cadastrada! O cronograma semanal foi recalculado.', 'success');
+        }
+
+        examForm.reset();
+        document.getElementById('examEditId').value = '';
+        document.getElementById('examFormTitle').textContent = 'Cadastrar Nova Avaliação';
+        btnCancelEdit.classList.add('hidden');
+
+        saveState();
+        renderAll();
+        switchTab('cronograma');
+      });
+
+      // Filtros e Gerador de Simulado Focado
+      document.getElementById('simuladoDisciplineFilter').addEventListener('change', (e) => {
+        state.simuladoDisciplineFilter = e.target.value;
+        state.simuladoActiveIds = null;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('simuladoDifficultyFilter').addEventListener('change', (e) => {
+        state.simuladoDifficultyFilter = e.target.value;
+        state.simuladoActiveIds = null;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('btnStartWeeklySimulado').addEventListener('click', () => {
+        const metrics = computeDisciplinePriorities();
+        const topDisciplines = Object.values(metrics)
+          .sort((a, b) => b.rawScore - a.rawScore)
+          .slice(0, 4)
+          .map(m => m.discipline.id);
+
+        // Prioriza questões das disciplinas mais urgentes ou ainda não respondidas
+        const prioritized = [...state.questions].sort((a, b) => {
+          const urgA = topDisciplines.includes(a.discipline) ? 0 : 1;
+          const urgB = topDisciplines.includes(b.discipline) ? 0 : 1;
+          if (urgA !== urgB) return urgA - urgB;
+          const ansA = state.answers[a.id] ? 1 : 0;
+          const ansB = state.answers[b.id] ? 1 : 0;
+          return ansA - ansB;
+        });
+
+        state.simuladoDisciplineFilter = 'ALL';
+        state.simuladoDifficultyFilter = 'ALL';
+        state.simuladoActiveIds = prioritized.slice(0, 8).map(q => q.id);
+        saveState();
+        renderAll();
+        showToast('Simulado focado gerado priorizando matérias com provas próximas e menor domínio.', 'success');
+      });
+    }
+
+    // Inicialização segura no carregamento da página
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        bindEvents();
+        renderAll();
+      } catch (err) {
+        console.error('Erro na inicialização da plataforma:', err);
+        showToast('Ocorreu um erro ao carregar a interface. Tente restaurar o padrão.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
